@@ -51,8 +51,18 @@ tr.lt td{background:var(--lt);color:var(--ltt)}tr.lt td[colspan]{white-space:nor
 .cat{background:var(--cd);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:10px}
 .chip{display:inline-flex;gap:6px;align-items:center;background:var(--ps);border-radius:14px;padding:3px 10px;margin:3px}.chip button{border:0;background:none;color:var(--rd);cursor:pointer}
 @media(max-width:800px){.side{transform:translateX(100%)}.side.op{transform:none}.main{margin:0;padding:12px}.mn{display:block}.g2{grid-template-columns:1fr}}
+@page{margin:0}
 @media print{.side,.top,.noprint,.tg{display:none!important}.main{margin:0;padding:0}body{background:#fff}.pv{border:0;padding:30px;-webkit-print-color-adjust:exact;print-color-adjust:exact}tr{break-inside:avoid}.gh,.pv th{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 .lk .side,.lk .main{display:none}
+.cbw{position:relative;margin-bottom:8px}.cll{font-size:13px;color:var(--mt);margin-bottom:4px}.cbi{position:relative}
+.cbq{padding-inline-end:34px}.cbq:disabled{opacity:.55;cursor:not-allowed}.cbq:focus{outline:2px solid var(--pr);outline-offset:-1px}
+.cbx{position:absolute;inset-inline-end:7px;top:50%;transform:translateY(-50%);border:0;background:var(--ps);color:var(--mt);width:22px;height:22px;border-radius:50%;cursor:pointer;line-height:20px;padding:0;font-size:15px}
+.cbl{position:absolute;z-index:60;inset-inline:0;top:calc(100% + 4px);max-height:230px;overflow:auto;background:var(--cd);border:1px solid var(--bd);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.25);padding:4px}
+.cbl[hidden],.cbx[hidden]{display:none}
+.cbo{padding:8px 10px;border-radius:8px;cursor:pointer;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}.cbo b{font-weight:600}.cbo small{color:var(--mt);font-size:12px}.cbo em{color:var(--rd);font-size:12px;font-style:normal;flex-basis:100%}
+.cbo.a,.cbo:hover{background:var(--ps)}.cbo.d{opacity:.45;cursor:not-allowed}.cbo.s b{color:var(--pr)}.cbo.s b::before{content:"✓ "}
+.cbo mark{background:#ffe08a;color:#111;border-radius:3px;padding:0 1px}.cbn{padding:12px;text-align:center;color:var(--mt)}
+.rs.bad .cbq{border-color:var(--rd);color:var(--rd)}
 .ssw{display:flex;align-items:center;gap:6px;margin:0;color:var(--tx);font-weight:800}.ssw span{white-space:nowrap;font-size:13px}.ssw select{width:auto;min-width:120px;border:2px solid var(--pr);font-weight:800}.sb{margin:0 8px 12px;padding:7px 10px;border-radius:8px;background:rgba(255,255,255,.15);font-size:13px}.sb b{display:block;font-size:16px}@media(max-width:800px){.ssw span{display:none}.ssw select{min-width:90px}}
 .mt{display:inline-flex;align-items:center;gap:7px;vertical-align:middle}.tl{height:20px;width:auto;max-width:30px;object-fit:contain}
 </style>
@@ -113,21 +123,48 @@ const pCats=()=>`<div class="bar"><button class="btn pr" onclick="catEdit()">+ �
 function catEdit(id){const o=id&&by('cats',id);gform(o?'تعديل الصنف':'إضافة صنف',[{k:'name',l:'اسم الصنف',r:1}],{name:o?.name||''},v=>{if(o)o.name=v.name;else S.cats.push({id:uid(),name:v.name,groups:[]});save();closeM();go()})}
 function grpAdd(c,g){const C=by('cats',c),o=g&&C.groups.find(x=>x.id==g);gform('المجموعة',[{k:'name',l:'اسم المجموعة',r:1}],{name:o?.name||''},v=>{if(o)o.name=v.name;else C.groups.push({id:uid(),name:v.name});save();closeM();go()})}
 function grpDel(c,g){if(S.matches.some(m=>m.grp==g)||S.teams.some(t=>t.grp==g))return toast('لا يمكن الحذف: المجموعة مستخدمة');ask('حذف المجموعة؟',()=>{const C=by('cats',c);C.groups=C.groups.filter(x=>x.id!=g);save();go()})}
+/* ===== قائمة بحث ذكية ===== */
+const CB={},nz1=c=>c.toLowerCase().replace(/[أإآ]/,'ا').replace('ى','ي').replace('ة','ه');
+function nzm(s){s=String(s||'');let n='',map=[];for(let i=0;i<s.length;i++){const c=s[i];if(/[ً-ْـ]/.test(c))continue;for(const d of nz1(c)){n+=d;map.push(i)}}return{n,map}}
+function cbHl(t,tk){const{n,map}=nzm(t),R=[];tk.forEach(k=>{const i=n.indexOf(k);if(i>=0)R.push([map[i],map[i+k.length-1]+1])});R.sort((a,b)=>a[0]-b[0]);const M=[];R.forEach(r=>{const l=M[M.length-1];if(l&&r[0]<=l[1])l[1]=Math.max(l[1],r[1]);else M.push([...r])});let o='',p=0;M.forEach(r=>{o+=esc(t.slice(p,r[0]))+'<mark>'+esc(t.slice(r[0],r[1]))+'</mark>';p=r[1]});return o+esc(t.slice(p))}
+function cbx(id,label,items,val,o={}){const c=items.find(x=>x.v==val);CB[id]=items;
+return `<div class="cbw" data-cb="${id}" data-val="${esc(val||'')}"><div class="cll">${label}</div><div class="cbi"><input class="cbq" type="text" autocomplete="off" spellcheck="false" placeholder="${esc(o.ph||'ابحث أو اختر…')}" value="${esc(c?c.t:'')}" data-cur="${esc(c?c.t:'')}" ${o.dis?'disabled':''}><button type="button" class="cbx" tabindex="-1" aria-label="مسح" ${val&&!o.dis?'':'hidden'}>×</button><div class="cbl" hidden></div></div></div>`}
+function cbWire(w,pick){const items=CB[w.dataset.cb]||[],cur=w.dataset.val,q=w.querySelector('.cbq'),L=w.querySelector('.cbl'),X=w.querySelector('.cbx');let act=0,vis=[],typed=false;
+const close=()=>{L.hidden=true;typed=false};
+const place=()=>{const r=q.getBoundingClientRect(),vh=innerHeight,below=vh-r.bottom-12,above=r.top-12,up=below<200&&above>below;L.style.position='fixed';L.style.insetInline='auto';L.style.left=r.left+'px';L.style.width=r.width+'px';L.style.maxHeight=Math.max(120,Math.min(260,up?above:below))+'px';if(up){L.style.top='auto';L.style.bottom=(vh-r.top+4)+'px'}else{L.style.bottom='auto';L.style.top=(r.bottom+4)+'px'}};
+L._place=place;const md=w.closest('.md');if(md)md.onscroll=()=>md.querySelectorAll('.cbl:not([hidden])').forEach(l=>l._place&&l._place());
+const render=()=>{const tk=typed?nzm(q.value).n.split(/\s+/).filter(Boolean):[];
+vis=items.map((x,i)=>{const all=nzm(x.t+' '+(x.s||'')).n;if(!tk.every(k=>all.includes(k)))return null;const nt=nzm(x.t).n,sc=!tk.length?0:nt.startsWith(tk[0])?0:nt.split(/\s+/).some(wd=>wd.startsWith(tk[0]))?1:2;return{x,sc,i}}).filter(Boolean).sort((a,b)=>a.sc-b.sc||a.i-b.i);
+if(!typed)act=Math.max(0,vis.findIndex(r=>r.x.v==cur));else act=0;
+L.innerHTML=vis.length?vis.map((r,j)=>`<div class="cbo${r.x.d?' d':''}${j==act?' a':''}${r.x.v==cur?' s':''}" data-j="${j}"><b>${cbHl(r.x.t,tk)}</b>${r.x.s?`<small>${esc(r.x.s)}</small>`:''}${r.x.n?`<small>${esc(r.x.n)}</small>`:''}${r.x.w?`<em>⚠ ${esc(r.x.w)}</em>`:''}</div>`).join(''):'<div class="cbn">لا توجد نتائج مطابقة</div>';
+L.hidden=false;place();const a=L.querySelector('.a');a&&a.scrollIntoView({block:'nearest'})};
+const pickAt=j=>{const r=vis[j];if(!r||r.x.d)return;close();pick(r.x.v)};
+q.onfocus=()=>{q.select();typed=false;render()};
+q.onclick=()=>{if(L.hidden){typed=false;render()}};
+q.oninput=()=>{typed=true;render()};
+q.onkeydown=e=>{if(e.key=='ArrowDown'||e.key=='ArrowUp'){e.preventDefault();if(L.hidden){typed=false;render();return}if(!vis.length)return;act=(act+(e.key=='ArrowDown'?1:-1)+vis.length)%vis.length;L.querySelectorAll('.cbo').forEach((el,j)=>el.classList.toggle('a',j==act));const a=L.querySelector('.a');a&&a.scrollIntoView({block:'nearest'})}
+else if(e.key=='Enter'){if(!L.hidden){e.preventDefault();pickAt(act)}}
+else if(e.key=='Escape'){if(!L.hidden){e.stopPropagation();close();q.value=q.dataset.cur}}
+else if(e.key=='Tab')close()};
+q.onblur=()=>{close();q.value=q.dataset.cur};
+L.onmousedown=e=>e.preventDefault();L.onclick=e=>{const o=e.target.closest('.cbo');if(o)pickAt(+o.dataset.j)};
+X.onmousedown=e=>e.preventDefault();X.onclick=()=>{close();pick('')}}
 /* match form */
-function mform(id,pg,mode){if(mode!='refs'&&!id&&!S.progs.length)return toast('أنشئ برمجة أولًا من «برمجة المقابلات»');const RM=mode=='refs',old=id&&by('matches',id);const m=old?JSON.parse(JSON.stringify(old)):{id:uid(),prog:pg||sv.prog||latest()?.id||'',status:'scheduled',moves:0,round:'',cat:'',grp:'',date:'',time:'',stad:'',t1:'',t2:'',refs:['','',''],notes:''};let okc=false;
-openM(RM?'تعيين الحكام':old?'تعديل المقابلة':'مقابلة جديدة',1);
-const sel=(k,l,o)=>`<label>${l}<select data-k="${k}"><option value="">— اختر —</option>${opt(o,m[k])}</select></label>`;
-const draw=()=>{okc=false;const gs=(by('cats',m.cat)?.groups||[]).map(g=>[g.id,g.name]),tm=S.teams.filter(t=>t.cat==m.cat&&t.grp==m.grp).map(t=>[t.id,t.name]);
-const rf=[0,1,2].map(i=>{const r=m.refs[i],cs=r?conf(r,m):[];const o=S.ref.filter(x=>x.active||x.id==r).map(x=>{const c=conf(x.id,m).length;const dup=m.refs.some((y,j)=>j!=i&&y==x.id);return `<option value="${x.id}" ${x.id==r?'selected':''} ${dup?'disabled':''} ${c?'class="bd"':''}>${esc(x.name)}${x.active?'':' (غير نشط)'}${c?' ⚠ — لديه مقابلة أخرى الساعة '+m.time:''}</option>`}).join('');
-return `<div class="rs${cs.length?' bad':''}"><label>${['الحكم الأول','الحكم الثاني','الحكم الثالث'][i]}${cs.length?' ⚠':''}<select data-r="${i}"><option value="">— ${esc(S.set.unset)} —</option>${o}</select></label>${cs.map(c=>`<div class="wn">⚠ تنبيه: هذا الحكم معين مسبقًا في مقابلة أخرى بنفس التاريخ والتوقيت.<br>${esc(cdesc(r,c))}${c.round?' ('+esc(nm('rounds',c.round))+')':''}.</div>`).join('')}</div>`}).join('');
-setM(`${RM?`<p><b>${esc(nm('teams',m.t1))} × ${esc(nm('teams',m.t2))}</b> — ${fd(m.date)} ${m.time} — ${esc(nm('stad',m.stad))}</p>`:`<div class="g2">${sel('prog','البرمجة',S.progs.map(p=>[p.id,p.name]))}${sel('round','الجولة',S.rounds.map(r=>[r.id,r.name]))}${sel('cat','الصنف',catO())}${sel('grp','المجموعة',gs)}<label>الملعب<select data-k="stad"><option value="">— اختر —</option>${opt(S.stad.map(s=>[s.id,s.name]),m.stad)}</select></label><label>التاريخ<input type="date" data-k="date" value="${m.date}"></label><label>التوقيت<input type="time" data-k="time" value="${m.time}"></label>${sel('t1','الفريق الأول',tm.filter(t=>t[0]!=m.t2))}${sel('t2','الفريق الثاني',tm.filter(t=>t[0]!=m.t1))}</div><label>ملاحظات (اختياري)<textarea rows="2" id="mn">${esc(m.notes)}</textarea></label>`}${RM?`<b>الحكام (اختياري — اتركها «غير معين» لحذف التعيين)</b><div style="margin-top:6px">${rf}</div>`:''}<div class="err" id="er"></div>`,
-[{t:'حفظ',c:'pr',f:()=>{const E_=$('#er');if($('#mn'))m.notes=$('#mn').value;const mis=!RM&&['prog','round','cat','grp','date','time','stad','t1','t2'].some(k=>!m[k]);if(mis)return E_.textContent='الرجاء تعبئة: الجولة والصنف والمجموعة والتاريخ والتوقيت والملعب والفريقين.';if(m.t1==m.t2)return E_.textContent='لا يمكن اختيار نفس الفريق مرتين.';const P=by('progs',m.prog);if(!RM&&P&&m.status!='moved'&&P.from&&(m.date<P.from||m.date>P.to))return E_.textContent='تاريخ المقابلة خارج فترة البرمجة ('+fd(P.from)+' – '+fd(P.to)+').';
+function mform(id,pg,mode,pre){if(mode!='refs'&&!id&&!S.progs.length)return toast('أنشئ برمجة أولًا من «برمجة المقابلات»');const RM=mode=='refs',old=id&&by('matches',id);const m=old?JSON.parse(JSON.stringify(old)):{id:uid(),prog:pg||sv.prog||latest()?.id||'',status:'scheduled',moves:0,round:'',cat:'',grp:'',date:'',time:'',stad:'',t1:'',t2:'',refs:['','',''],notes:'',...(pre||{})};let okc=false;
+const doSave=again=>{const E_=$('#er');if($('#mn'))m.notes=$('#mn').value;const mis=!RM&&['prog','round','cat','grp','date','time','stad','t1','t2'].some(k=>!m[k]);if(mis)return E_.textContent='الرجاء تعبئة: الجولة والصنف والمجموعة والتاريخ والتوقيت والملعب والفريقين.';if(m.t1==m.t2)return E_.textContent='لا يمكن اختيار نفس الفريق مرتين.';const P=by('progs',m.prog);if(!RM&&P&&m.status!='moved'&&P.from&&(m.date<P.from||m.date>P.to))return E_.textContent='تاريخ المقابلة خارج فترة البرمجة ('+fd(P.from)+' – '+fd(P.to)+').';
 const rs=m.refs.filter(Boolean);if(new Set(rs).size<rs.length)return E_.textContent='لا يمكن اختيار نفس الحكم أكثر من مرة.';
 const nc=m.refs.filter(r=>r&&conf(r,m).length).length;if(nc&&S.set.block)return E_.textContent='يوجد تعارض في تعيين الحكام، والحفظ ممنوع حسب الإعدادات.';
 if(nc&&!okc){okc=true;return E_.textContent='⚠ يوجد تعارض في التعيين. اضغط «حفظ» مرة أخرى للتأكيد.'}
-if(!m.orig)m.orig=m.prog;if(old)Object.assign(old,m);else S.matches.push(m);save();closeM();go();toast('تم حفظ المقابلة')}},{t:'إلغاء',f:closeM}]);
+if(!m.orig)m.orig=m.prog;if(old)Object.assign(old,m);else S.matches.push(m);save();closeM();go();toast(again?'تم الحفظ — أدخل المقابلة التالية':'تم حفظ المقابلة');if(again)mform(null,m.prog,undefined,{round:m.round,cat:m.cat,grp:m.grp,date:m.date})};
+openM(RM?'تعيين الحكام':old?'تعديل المقابلة':'مقابلة جديدة',1);
+const sel=(k,l,o)=>`<label>${l}<select data-k="${k}"><option value="">— اختر —</option>${opt(o,m[k])}</select></label>`;
+const draw=()=>{okc=false;const gs=(by('cats',m.cat)?.groups||[]).map(g=>[g.id,g.name]),tm=S.teams.filter(t=>t.cat==m.cat&&t.grp==m.grp).map(t=>[t.id,t.name]);
+const rf=[0,1,2].map(i=>{const r=m.refs[i],cs=r?conf(r,m):[];const items=S.ref.filter(x=>x.active||x.id==r).map(x=>{const c=conf(x.id,m).length,dup=m.refs.some((y,j)=>j!=i&&y==x.id);return{v:x.id,t:x.name,s:[x.active?'':'غير نشط',x.phone||''].filter(Boolean).join(' · '),d:dup,n:dup?'مختار في خانة أخرى':'',w:c?'لديه مقابلة أخرى الساعة '+m.time:''}});
+return `<div class="rs${cs.length?' bad':''}">${cbx('r'+i,['الحكم الأول','الحكم الثاني','الحكم الثالث'][i]+(cs.length?' ⚠':''),items,r,{ph:S.set.unset+' — اكتب للبحث عن حكم…'})}${cs.map(c=>`<div class="wn">⚠ تنبيه: هذا الحكم معين مسبقًا في مقابلة أخرى بنفس التاريخ والتوقيت.<br>${esc(cdesc(r,c))}${c.round?' ('+esc(nm('rounds',c.round))+')':''}.</div>`).join('')}</div>`}).join('');
+setM(`${RM?`<p><b>${esc(nm('teams',m.t1))} × ${esc(nm('teams',m.t2))}</b> — ${fd(m.date)} ${m.time} — ${esc(nm('stad',m.stad))}</p>`:`<div class="g2">${sel('prog','البرمجة',S.progs.map(p=>[p.id,p.name]))}${sel('round','الجولة',S.rounds.map(r=>[r.id,r.name]))}${sel('cat','الصنف',catO())}${sel('grp','المجموعة',gs)}${cbx('stad','الملعب',S.stad.map(s=>({v:s.id,t:s.name,s:s.loc||''})),m.stad,{ph:'ابحث عن ملعب…'})}<label>التاريخ<input type="date" data-k="date" value="${m.date}"></label><label>التوقيت<input type="time" data-k="time" value="${m.time}"></label>${cbx('t1','الفريق الأول',tm.filter(t=>t[0]!=m.t2).map(t=>({v:t[0],t:t[1]})),m.t1,{dis:!m.cat||!m.grp,ph:m.cat&&m.grp?'ابحث عن فريق…':'اختر الصنف والمجموعة أولًا'})}${cbx('t2','الفريق الثاني',tm.filter(t=>t[0]!=m.t1).map(t=>({v:t[0],t:t[1]})),m.t2,{dis:!m.cat||!m.grp,ph:m.cat&&m.grp?'ابحث عن فريق…':'اختر الصنف والمجموعة أولًا'})}</div><label>ملاحظات (اختياري)<textarea rows="2" id="mn">${esc(m.notes)}</textarea></label>`}${RM?`<b>الحكام (اختياري — اتركها «غير معين» لحذف التعيين)</b><div style="margin-top:6px">${rf}</div>`:''}<div class="err" id="er"></div>`,
+[{t:'حفظ',c:'pr',f:()=>doSave(0)},...(RM?[]:[{t:'حفظ وإضافة مقابلة جديدة',f:()=>doSave(1)}]),{t:'إلغاء',f:closeM}]);
 mEl.querySelectorAll('[data-k]').forEach(e=>e.onchange=()=>{const k=e.dataset.k;m[k]=e.value;if(k=='cat'){m.grp='';m.t1=m.t2=''}if(k=='grp')m.t1=m.t2='';draw()});
-mEl.querySelectorAll('[data-r]').forEach(e=>e.onchange=()=>{m.refs[+e.dataset.r]=e.value;draw()});
+mEl.querySelectorAll('.cbw').forEach(w=>cbWire(w,v=>{const id=w.dataset.cb;if(/^r\d$/.test(id))m.refs[+id[1]]=v;else m[id]=v;draw()}));
 $('#mn')&&($('#mn').oninput=e=>m.notes=e.target.value)};draw()}
 /* schedule */
 const flt=m=>{const f=sv.f,q=(f.q||'').trim();return(!q||[nm('teams',m.t1),nm('teams',m.t2),...m.refs.map(r=>r?nm('ref',r):'')].some(x=>x.includes(q)))&&(!f.date||m.date==f.date)&&(!f.prog||m.prog==f.prog)&&(!f.round||m.round==f.round)&&(!f.cat||m.cat==f.cat)&&(!f.grp||m.grp==f.grp)&&(!f.stad||m.stad==f.stad)&&(!f.st||(f.st=='with'?m.refs.some(Boolean):f.st=='without'?!m.refs.some(Boolean):hasConf(m)))};

@@ -44,3 +44,7 @@ git push -u origin main
 1. New → Blueprint (أو Web Service) واربطه بمستودع GitHub.
 2. أضف `MONGODB_URI` و`SETUP_CODE` (و`JWT_SECRET` يُولَّد تلقائيًا).
 3. في MongoDB Atlas: Network Access → اسمح بعنوان Render (أو `0.0.0.0/0`).
+
+## إبقاء الموقع مستيقظًا على Render
+- الخادم يرسل طلبًا ذاتيًا إلى `/healthz` كل 10 دقائق (يعمل تلقائيًا على Render عبر `RENDER_EXTERNAL_URL`).
+- للتأكيد (ولإيقاظ الموقع إن نام لأي سبب)، أضف مراقبًا خارجيًا مجانيًا مثل UptimeRobot أو cron-job.org يطلب `https://اسم-تطبيقك.onrender.com/healthz` كل 5 دقائق.

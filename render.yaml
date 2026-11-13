@@ -3,6 +3,7 @@ services:
     name: referee-assignments
     runtime: node
     plan: free
+    healthCheckPath: /healthz
     buildCommand: npm install
     startCommand: node server.js
     envVars:
