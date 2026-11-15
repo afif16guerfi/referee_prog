@@ -46,8 +46,8 @@ textarea.ag{resize:none;overflow:hidden;min-height:38px;line-height:1.5;display:
 .mhd img{max-height:100px;max-width:130px;object-fit:contain}
 .mhd .ml{text-align:center;line-height:1.55}
 .mhd .ml b{display:block;font-weight:800;font-size:17px;color:#1d2b33}
-.mhd .ml b.g{color:#0b6e4f;font-size:20px}
-.pv .mtt{text-align:center;font-weight:800;font-size:46px;color:#0b6e4f;line-height:1.35;margin:6px 0 10px}
+.mhd .ml b.g{color:var(--mc,#0b6e4f);font-size:20px}
+.pv .mtt{text-align:center;font-weight:800;font-size:46px;color:var(--mc,#0b6e4f);line-height:1.35;margin:6px 0 10px}
 .mif{display:flex;justify-content:space-between;gap:12px;font-weight:800;font-size:15px;margin:6px 4px 4px}
 .mmb{font-weight:800;font-size:15px;margin:4px 4px;line-height:1.9}
 .mst{font-weight:800;font-size:16px;text-align:center;margin:10px 0 8px}
@@ -55,24 +55,42 @@ i.mdr{font-style:normal;border:1px solid #b45f06;color:#b45f06;border-radius:10p
 .mcs{margin:0 0 14px}
 .mch{display:flex;gap:10px;align-items:stretch;margin-bottom:6px}
 .mch .mca{flex:0 0 49%}.mch .mcb{flex:1;min-width:0}
-.pv table.mx{border-collapse:collapse;width:100%;table-layout:fixed;border:0}
-.pv table.mx th,.pv table.mx td{border:1px solid #333;padding:4px 6px;text-align:center;vertical-align:middle;white-space:normal;font-size:14px;line-height:1.5;overflow-wrap:anywhere;color:#111}
-.pv table.mx th{background:#fbdcc8;font-weight:800}
-.pv table.mx td{background:#fff6e0;font-weight:600}
+/* جداول المحضر بحواف مستديرة خفيفة: border-collapse:separate مع حدود الخلايا الداخلية فقط، وزوايا الخلايا الطرفية تتبع تقويس الجدول */
+.pv table.mx{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed;border:1px solid var(--mbd,#333);border-radius:var(--mr,8px)}
+.pv table.mx th,.pv table.mx td{border:0;padding:4px 6px;text-align:center;vertical-align:middle;white-space:normal;font-size:14px;line-height:1.5;overflow-wrap:anywhere;color:#111}
+.pv table.mx th:not(:last-child),.pv table.mx td:not(:last-child){border-inline-end:1px solid var(--mbd,#333)}
+.pv table.mx tr+tr>th,.pv table.mx tr+tr>td,.pv table.mx thead+tbody>tr>th,.pv table.mx thead+tbody>tr>td{border-top:1px solid var(--mbd,#333)}
+.pv table.mx th{background:var(--mth,#fbdcc8);font-weight:800}
+.pv table.mx td{background:var(--mtd,#fff6e0);font-weight:600}
+.pv table.mx thead>tr:first-child>:first-child,.pv table.mx colgroup+tbody>tr:first-child>:first-child{border-top-right-radius:calc(var(--mr,8px) - 1px)}
+.pv table.mx thead>tr:first-child>:last-child,.pv table.mx colgroup+tbody>tr:first-child>:last-child{border-top-left-radius:calc(var(--mr,8px) - 1px)}
+.pv table.mx>tbody>tr:last-child>:first-child{border-bottom-right-radius:calc(var(--mr,8px) - 1px)}
+.pv table.mx>tbody>tr:last-child>:last-child{border-bottom-left-radius:calc(var(--mr,8px) - 1px)}
 .pv table.mcr,.mch .mcb table.mx{height:100%}
 .pv table.mp th{font-size:13px}
-.pv table.mp td{font-size:13.5px;background:#fffaf0}
-.pv table.mp.rw td,.pv table.mp.rw{border-top:0}
-.pv table.mp.rw td{border-top:0}
+.pv table.mp td{font-size:13.5px;background:var(--mtp,#fffaf0)}
+/* أجزاء الجدول في PDF: الترويسة (hd) مستديرة من الأعلى، والصف الأخير (ls) من الأسفل، وما بينهما مستقيم ليتصل الجدول بصريًا */
+.pv table.mx.mhh{border-radius:var(--mr,8px) var(--mr,8px) 0 0}
+.pv table.mp.rw{border-top:0;border-radius:0}
+.pv table.mp.rw>tbody>tr>*{border-radius:0!important}
+.pv table.mp.rw.ls{border-radius:0 0 var(--mr,8px) var(--mr,8px)}
+.pv table.mp.rw.ls>tbody>tr>:first-child{border-bottom-right-radius:calc(var(--mr,8px) - 1px)!important}
+.pv table.mp.rw.ls>tbody>tr>:last-child{border-bottom-left-radius:calc(var(--mr,8px) - 1px)!important}
+/* جدول متصل بتقرير تحته (tj): الزوايا السفلية مستقيمة */
+.pv table.mp.tj{border-radius:var(--mr,8px) var(--mr,8px) 0 0}
+.pv table.mp.tj>tbody>tr:last-child>*{border-bottom-left-radius:0;border-bottom-right-radius:0}
 .mcs .tw{overflow-x:auto;background:none;border:0;border-radius:0;box-shadow:none}
 .mcs .tw table.mp{min-width:640px}
-.pv .mrp{border:1px solid #333;padding:8px 14px;margin-top:6px;font-size:15px;line-height:1.95;text-align:right;direction:rtl;overflow-wrap:anywhere;background:#fff;color:#111}
-.pv .mcs .tw+.mrp{margin-top:0;border-top:0}
+.pv .mrp{border:1px solid var(--mbd,#333);border-radius:var(--mr,8px);padding:8px 14px;margin-top:6px;font-size:15px;line-height:1.95;text-align:right;direction:rtl;overflow-wrap:anywhere;background:#fff;color:#111}
+.pv .mcs .tw+.mrp{margin-top:0;border-top:0;border-radius:0 0 var(--mr,8px) var(--mr,8px)}
 .mrp p,.mrp div{margin:0}.mrp ul,.mrp ol{margin:0;padding-inline-start:28px}.mrp li{margin:0}
-.pv .mrp.u{margin:0;border-top:0;border-bottom:0;padding-top:0;padding-bottom:0}
-.pv .mrp.u.f{border-top:1px solid #333;padding-top:8px}
-.pv .mrp.u.l{border-bottom:1px solid #333;padding-bottom:8px}
-.mmini{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:14px;color:#0b6e4f;border-bottom:2px solid #0b6e4f;padding:2px 4px 5px}
+.pv .mrp.u{margin:0;border-top:0;border-bottom:0;border-radius:0;padding-top:0;padding-bottom:0}
+.pv .mrp.u.f{border-top:1px solid var(--mbd,#333);border-radius:var(--mr,8px) var(--mr,8px) 0 0;padding-top:8px}
+.pv .mrp.u.l{border-bottom:1px solid var(--mbd,#333);border-radius:0 0 var(--mr,8px) var(--mr,8px);padding-bottom:8px}
+.pv .mrp.u.f.l{border-radius:var(--mr,8px)}
+.pv .mrp.u.f.j{border-top:0;border-radius:0}
+.pv .mrp.u.f.l.j{border-radius:0 0 var(--mr,8px) var(--mr,8px)}
+.mmini{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:14px;color:var(--mc,#0b6e4f);border-bottom:2px solid var(--mc,#0b6e4f);padding:2px 4px 5px}
 .mpv .ct{margin-top:10px}
 @media(max-width:640px){
 .pv.mpv{padding:14px 10px 8px}
@@ -103,3 +121,16 @@ i.mdr{font-style:normal;border:1px solid #b45f06;color:#b45f06;border-radius:10p
 
 .ltr{display:inline-block;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
 .mli{display:flex;gap:8px;padding-inline-start:12px}.mli .mk{flex:none}.mli>div{flex:1;min-width:0}
+
+/* ===== تصميم المحضر (ألوان الخلفية والجداول) لكل لجنة ===== */
+.cmw{--ca:#0b6e4f}
+.cmw .cc{border-top:3px solid var(--ca)}
+.thp{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;padding:8px 12px;border:1px solid var(--bd);border-inline-start:4px solid var(--ca);border-radius:var(--r);background:var(--cd)}
+.thp>b{font-size:13px;margin-inline-end:4px}
+.thp .tho{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:3px 10px 3px 12px;border:1px solid var(--bd);border-radius:var(--r2);background:var(--cd);color:var(--tx);font:inherit;font-size:13px;cursor:pointer;margin:0}
+.thp .tho:hover{border-color:var(--pr)}
+.thp .tho.on{border-color:var(--ca);box-shadow:0 0 0 2px var(--ca);font-weight:800}
+.thp .sw{display:inline-flex;width:34px;height:18px;border-radius:5px;overflow:hidden;border:1px solid rgba(0,0,0,.25);flex:none}
+.thp .sw i{flex:1}
+.thc{margin-bottom:12px}
+.thc .thp{margin:6px 0 0}

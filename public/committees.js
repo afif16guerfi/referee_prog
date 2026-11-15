@@ -16,7 +16,7 @@ const p2=n=>String(n).padStart(2,'0'),
  cl=o=>JSON.parse(JSON.stringify(o)),
  rtEmpty=h=>!/\S/.test(String(h||'').replace(/<[^>]*>|&nbsp;/g,' ')),
  PGE=document.getElementById('pg');
-let ED=null,CTAB='m',LQ='',BT=0,RS=null,MBG='';
+let ED=null,CTAB='m',LQ='',BT=0,RS=null;const MBGS={};
 const VW={disc:'',org:''};
 const mById=(k,id)=>S[k].minutes.find(x=>x.id==id),
  mIdx=(k,id)=>id?S[k].minutes.findIndex(x=>x.id==id):S[k].minutes.length,
@@ -46,12 +46,29 @@ const al=c.getAttribute('align');if(al&&/^(right|left|center|justify)$/i.test(al
 function cleanHtml(h){const d=new DOMParser().parseFromString('<body>'+String(h||'')+'</body>','text/html'),o=document.createElement('div');sNode(d.body,o);return o.innerHTML}
 X.clean=cleanHtml;
 
-/* ===== خلفية الصفحة (الزوايا الزخرفية) — تُولَّد مرة واحدة وتُستعمل في المعاينة والطباعة وPDF ===== */
-function mBg(){if(MBG)return MBG;const w=1240,h=1754,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);
-const G='#0b6e4f',G2='#1aa876',D='#10262e',poly=(col,pts)=>{x.fillStyle=col;x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();x.fill()};
-/* أعلى اليسار: شريط داكن مائل مع خط أخضر */
+/* ===== تصاميم المحضر (ألوان الزخارف والعناوين والجداول) =====
+   الاختيار محفوظ لكل لجنة على حدة في S.set.cth (وليس داخل المحاضر ولا القضايا)، فتغييره لا يمس أي بيانات محفوظة.
+   الورقة بيضاء دائمًا في كل التصاميم (حتى التصميم الداكن) لضمان وضوح النص وجودة الطباعة.
+   g=اللون الرئيسي، g2=لون التمييز، d=الشريط الداكن، th=خلفية رؤوس الجداول، td=خلفية الخلايا، tp=خلفية جدول الأشخاص */
+const THEMES=[
+{id:'brand',n:'هوية المشروع',g:'#0b6e4f',g2:'#1aa876',d:'#10262e',th:'#fbdcc8',td:'#fff6e0',tp:'#fffaf0'},
+{id:'green',n:'أخضر',g:'#1b7f3b',g2:'#4cbb5f',d:'#0e2a17',th:'#d3ecd9',td:'#f0f9f2',tp:'#f7fcf8'},
+{id:'red',n:'أحمر',g:'#a61b1f',g2:'#e2474b',d:'#2a0f10',th:'#f6d4d4',td:'#fff1ef',tp:'#fff8f7'},
+{id:'blue',n:'أزرق',g:'#0d5aa7',g2:'#3a9ad9',d:'#0b2140',th:'#d3e4f6',td:'#eef5fc',tp:'#f6faff'},
+{id:'dark',n:'داكن',g:'#262b36',g2:'#7b8497',d:'#12151c',th:'#d9dde5',td:'#f1f3f7',tp:'#f8f9fb'}];
+const thOf=k=>{const id=S.set&&S.set.cth&&S.set.cth[k];return THEMES.find(t=>t.id==id)||THEMES[0]};
+const thVars=t=>`--mc:${t.g};--mth:${t.th};--mtd:${t.td};--mtp:${t.tp}`;
+const thSw=t=>`<span class="sw" aria-hidden="true"><i style="background:${t.d}"></i><i style="background:${t.g}"></i><i style="background:${t.g2}"></i><i style="background:${t.th}"></i></span>`;
+const thPick=(k,title)=>`<div class="thp noprint" role="group" aria-label="${title}"><b>${title}</b>${THEMES.map(t=>`<button type="button" class="tho${t.id==thOf(k).id?' on':''}" aria-pressed="${t.id==thOf(k).id}" onclick="CMX.theme('${k}','${t.id}')">${thSw(t)}${t.n}</button>`).join('')}</div>`;
+X.theme=(k,id)=>{if(!CM[k]||!THEMES.some(t=>t.id==id))return;S.set.cth={...(S.set.cth||{}),[k]:id};save();go()};
+X.themeCard=()=>`<div class="cat thc"><b>تصميم محاضر اللجان (لون الخلفية والجداول)</b><p style="color:var(--mt);font-size:13px;margin:4px 0 0">يُطبَّق على المعاينة والطباعة وملف PDF لكل لجنة على حدة، ولا يغيّر المحاضر أو القضايا المحفوظة. الورقة تبقى بيضاء لضمان وضوح النص وجودة الطباعة.</p>${CMK.map(k=>thPick(k,CM[k].n)).join('')}</div>`;
+
+/* ===== خلفية الصفحة (الزوايا الزخرفية) — تُولَّد مرة لكل تصميم وتُستعمل في المعاينة والطباعة وPDF ===== */
+function mBg(t){t=t||THEMES[0];let u=MBGS[t.id];if(!u){const w=1240,h=1754,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);
+const G=t.g,G2=t.g2,D=t.d,poly=(col,pts)=>{x.fillStyle=col;x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();x.fill()};
+/* أعلى اليسار: شريط داكن مائل مع خط تمييز */
 poly(D,[[0,0],[w*.58,0],[w*.535,h*.021],[0,h*.021]]);poly(G2,[[0,h*.0245],[w*.5,h*.0245],[w*.485,h*.031],[0,h*.031]]);
-/* أعلى اليمين: مثلث أخضر كبير مع حافة داكنة */
+/* أعلى اليمين: مثلث كبير مع حافة داكنة */
 poly(G,[[w*.9,0],[w,0],[w,h*.058]]);poly(D,[[w*.82,0],[w*.9,0],[w,h*.058],[w,h*.07]]);poly(G2,[[w*.96,0],[w,0],[w,h*.025]]);
 /* أسفل اليسار */
 poly(G,[[0,h*.95],[w*.05,h],[0,h]]);poly(D,[[0,h*.935],[0,h*.95],[w*.05,h],[w*.1,h]]);
@@ -59,7 +76,8 @@ poly(G,[[0,h*.95],[w*.05,h],[0,h]]);poly(D,[[0,h*.935],[0,h*.95],[w*.05,h],[w*.1
 poly(D,[[w,h*.968],[w*.42,h*.968],[w*.4,h*.979],[w,h*.979]]);poly(G2,[[w,h*.9835],[w*.46,h*.9835],[w*.445,h*.9895],[w,h*.9895]]);poly(G,[[w,h*.93],[w,h],[w*.9,h]]);
 /* إطار جانبي رفيع */
 x.fillStyle=G;x.fillRect(0,h*.12,w*.008,h*.76);x.fillRect(w*.992,h*.14,w*.008,h*.74);
-MBG=c.toDataURL('image/jpeg',.92);document.documentElement.style.setProperty('--mbg',`url(${MBG})`);return MBG}
+u=MBGS[t.id]=c.toDataURL('image/jpeg',.92)}
+document.documentElement.style.setProperty('--mbg',`url(${u})`);return u}
 
 /* ===== بناء مكونات المحضر (تُستعمل في المعاينة والطباعة وPDF) ===== */
 const hdrH=k=>{const s=S.set;let L=[s.mh1,s.mh2,s.mh3].filter(Boolean);if(!L.length)L=[s.l1].filter(Boolean);
@@ -69,20 +87,20 @@ return `<div class="mif"><span>الجلسة : ${bdi(dmy(m.date))}</span><span>ا
 const miniH=(k,m,i)=>`<div class="mmini"><span>${CM[k].n}</span><span>المحضر رقم : ${bdi(p2(i+1))}</span><span>الجلسة : ${bdi(dmy(m.date))}</span></div>`;
 const caseHead=(c,n)=>`<div class="mch"><div class="mca"><table class="mx mcr"><colgroup><col style="width:30%"><col></colgroup><tr><th>رقم القضية</th><td>${bdi(p2(n))}</td></tr><tr><th>المقابلة</th><td>${esc(c.t1)} – ${esc(c.t2)}</td></tr></table></div><div class="mcb"><table class="mx"><thead><tr><th>الصنف</th><th>التاريخ</th><th>الوقت</th><th>الملعب</th></tr></thead><tbody><tr><td>${esc(c.cat)}</td><td>${bdi(dmy(c.date))}</td><td>${bdi(c.time?ft(c.time):'')}</td><td>${esc(c.stad)}</td></tr></tbody></table></div></div>`;
 const mCols='<colgroup>'+PCOL.map(c=>`<col style="width:${c[2]}%">`).join('')+'</colgroup>',
- pHead=()=>`<table class="mx mp">${mCols}<thead><tr>${PCOL.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead></table>`,
+ pHead=()=>`<table class="mx mp mhh">${mCols}<thead><tr>${PCOL.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead></table>`,
  pCells=r=>PCOL.map(c=>`<td>${c[0]=='lic'?bdi(r.lic):esc(r[c[0]])}</td>`).join('');
-const caseH=(k,c,n)=>`<div class="mcs">${caseHead(c,n)}${CM[k].P&&c.rows&&c.rows.length?`<div class="tw"><table class="mx mp">${mCols}<thead><tr>${PCOL.map(x=>`<th>${x[1]}</th>`).join('')}</tr></thead><tbody>${c.rows.map(r=>`<tr>${pCells(r)}</tr>`).join('')}</tbody></table></div>`:''}${rtEmpty(c.report)?'':`<div class="mrp">${cleanHtml(c.report)}</div>`}</div>`;
+const caseH=(k,c,n)=>`<div class="mcs">${caseHead(c,n)}${CM[k].P&&c.rows&&c.rows.length?`<div class="tw"><table class="mx mp${rtEmpty(c.report)?'':' tj'}">${mCols}<thead><tr>${PCOL.map(x=>`<th>${x[1]}</th>`).join('')}</tr></thead><tbody>${c.rows.map(r=>`<tr>${pCells(r)}</tr>`).join('')}</tbody></table></div>`:''}${rtEmpty(c.report)?'':`<div class="mrp">${cleanHtml(c.report)}</div>`}</div>`;
 const docH=(k,m,i)=>{const b=baseOf(k,i);return `<table class="mpt"><thead><tr><td class="sp"></td></tr></thead><tbody><tr><td>${hdrH(k)}${infoH(k,m,i)}</td></tr>${m.cases.map((c,j)=>`<tr><td>${caseH(k,c,b+j+1)}</td></tr>`).join('')||'<tr><td class="em">لا توجد قضايا في هذا المحضر.</td></tr>'}</tbody><tfoot><tr><td class="sp">${pfoot()}</td></tr></tfoot></table><div class="mfx" aria-hidden="true"></div>`};
 
 /* ===== الصفحات: قائمة المحاضر / القوائم / العرض ===== */
-X.pg=function(k){X.mig();if(ED&&ED.k==k)return edHtml();const m=VW[k]&&mById(k,VW[k]);if(m){mBg();return viewHtml(k,m)}VW[k]='';return(k=='disc'&&CTAB=='l')?listsHtml():listHtml(k)};
+X.pg=function(k){X.mig();const w=h=>`<div class="cmw" style="--ca:${thOf(k).g}">${h}</div>`;if(ED&&ED.k==k)return w(edHtml());const m=VW[k]&&mById(k,VW[k]);if(m){mBg(thOf(k));return w(viewHtml(k,m))}VW[k]='';return w((k=='disc'&&CTAB=='l')?listsHtml():listHtml(k))};
 const tabs=k=>k!='disc'?'':`<div class="bar noprint"><div class="seg" role="tablist" aria-label="أقسام لجنة الانضباط"><button type="button" role="tab" aria-selected="${CTAB=='m'}" class="${CTAB=='m'?'on':''}" onclick="CMX.tab('m')">المحاضر</button><button type="button" role="tab" aria-selected="${CTAB=='l'}" class="${CTAB=='l'?'on':''}" onclick="CMX.tab('l')">القوائم</button></div></div>`;
 X.tab=t=>{CTAB=t;LQ='';go()};
 function listHtml(k){const M=S[k].minutes,tc=M.reduce((a,m)=>a+m.cases.length,0);let b=0;
 const rows=M.map((m,i)=>{const n=m.cases.length,a=b+1,z=b+n;b+=n;const mem=m.members.filter(x=>x.n).map(x=>esc(x.n)+(x.r?' ('+esc(x.r)+')':'')).join('، ');
 return `<tr><td data-l="المحضر"><b>${bdi(p2(i+1))}</b></td><td data-l="تاريخ الجلسة">${bdi(dmy(m.date))}</td><td data-l="الأعضاء الحاضرون" style="white-space:normal;min-width:200px">${mem||'—'}</td><td data-l="القضايا">${n?(n==1?bdi(p2(a)):bdi(p2(a))+' – '+bdi(p2(z)))+` <small class="sb2">(${n})</small>`:'—'}</td><td data-l="الحالة">${m.status=='final'?'<span class="ok">✔ نهائي</span>':'<span class="lb">مسودة</span>'}</td><td class="ac"><button class="btn pr" onclick="CMX.view('${k}','${m.id}')">عرض</button><button class="btn" onclick="CMX.edit('${k}','${m.id}')">تعديل</button><button class="btn" onclick="CMX.pdf('${k}','${m.id}')">PDF</button><button class="btn" onclick="CMX.print('${k}','${m.id}')">طباعة</button><button class="btn dg" onclick="CMX.del('${k}','${m.id}')">حذف</button></td></tr>`}).join('');
-return `${tabs(k)}<div class="bar noprint"><button class="btn pr" onclick="CMX.new('${k}')">+ محضر جديد</button><span style="color:var(--mt);font-size:13px;flex:1">${CM[k].n} — الموسم ${esc(seasonName())}: ${M.length} محضر، ${tc} قضية</span></div><div class="tw rtw"><table class="rt"><thead><tr><th>المحضر</th><th>تاريخ الجلسة</th><th>الأعضاء الحاضرون</th><th>القضايا</th><th>الحالة</th><th></th></tr></thead>${rows||'<tr><td colspan="6" class="em">لا توجد محاضر في هذا الموسم. اضغط «+ محضر جديد» للبدء.</td></tr>'}</table></div>`}
-function viewHtml(k,m){const i=mIdx(k,m.id),id=m.id;return `<div class="bar noprint"><button class="btn" onclick="CMX.back('${k}')">← المحاضر</button><b style="flex:1;min-width:150px">${CM[k].n} — المحضر رقم ${p2(i+1)} ${m.status=='final'?'<span class="ok">✔ نهائي</span>':'<span class="lb">مسودة</span>'}</b><button class="btn pr" onclick="CMX.edit('${k}','${id}')">تعديل</button><button class="btn" onclick="CMX.pdf('${k}','${id}')">⬇ تحميل PDF</button><button class="btn" onclick="CMX.print('${k}','${id}')">طباعة</button><button class="btn dg" onclick="CMX.del('${k}','${id}')">حذف</button></div><div class="pv mpv">${docH(k,m,i)}</div>`}
+return `${tabs(k)}<div class="bar noprint"><button class="btn pr" onclick="CMX.new('${k}')">+ محضر جديد</button><span style="color:var(--mt);font-size:13px;flex:1">${CM[k].n} — الموسم ${esc(seasonName())}: ${M.length} محضر، ${tc} قضية</span></div>${thPick(k,'تصميم المحاضر')}<div class="tw rtw"><table class="rt"><thead><tr><th>المحضر</th><th>تاريخ الجلسة</th><th>الأعضاء الحاضرون</th><th>القضايا</th><th>الحالة</th><th></th></tr></thead>${rows||'<tr><td colspan="6" class="em">لا توجد محاضر في هذا الموسم. اضغط «+ محضر جديد» للبدء.</td></tr>'}</table></div>`}
+function viewHtml(k,m){const i=mIdx(k,m.id),id=m.id;return `<div class="bar noprint"><button class="btn" onclick="CMX.back('${k}')">← المحاضر</button><b style="flex:1;min-width:150px">${CM[k].n} — المحضر رقم ${p2(i+1)} ${m.status=='final'?'<span class="ok">✔ نهائي</span>':'<span class="lb">مسودة</span>'}</b><button class="btn pr" onclick="CMX.edit('${k}','${id}')">تعديل</button><button class="btn" onclick="CMX.pdf('${k}','${id}')">⬇ تحميل PDF</button><button class="btn" onclick="CMX.print('${k}','${id}')">طباعة</button><button class="btn dg" onclick="CMX.del('${k}','${id}')">حذف</button></div>${thPick(k,'تصميم المحضر')}<div class="pv mpv" style="${thVars(thOf(k))}">${docH(k,m,i)}</div>`}
 X.view=(k,id)=>{VW[k]=id;go();scrollTo(0,0)};
 X.back=k=>{VW[k]='';go()};
 X.del=(k,id)=>{const i=mIdx(k,id),m=S[k].minutes[i];if(!m)return;ask(`حذف المحضر رقم ${p2(i+1)} نهائيًا${m.cases.length?' مع قضاياه ('+m.cases.length+')':''}؟ سيُعاد ترقيم المحاضر والقضايا اللاحقة تلقائيًا.`,()=>{S[k].minutes.splice(i,1);if(VW[k]==id)VW[k]='';save();go();toast('تم حذف المحضر وإعادة الترقيم')})};
@@ -214,10 +232,10 @@ X.pdf=async(k,id)=>{let host;try{if(ED&&ED.k==k&&ED.mid==id&&ED.dirty){toast('ا
 if(!window.jspdf||!window.html2canvas)return toast('تعذر تحميل مكتبة PDF، تحقق من الاتصال');const m=mById(k,id);if(!m)return;
 toast('جارٍ إنشاء الملف…');await document.fonts.ready;await Promise.all(FONTS.map(f=>document.fonts.load('700 16px "'+f+'"').catch(()=>0)));
 const i=mIdx(k,id),base=baseOf(k,i),P=CM[k].P,W=760,PW=210,PH=297,MX=10,MT=14,MB=15,kk=(PW-2*MX)/W;
-host=document.createElement('div');host.className='pv pdfx';host.style.cssText=`position:absolute;left:-20000px;top:0;width:${W}px;padding:0;border:0;background:transparent;color:#111`;document.body.appendChild(host);
+host=document.createElement('div');host.className='pv pdfx';const TH=thOf(k);host.style.cssText=`position:absolute;left:-20000px;top:0;width:${W}px;padding:0;border:0;background:transparent;color:#111;${thVars(TH)}`;document.body.appendChild(host);
 const R=async html=>{host.innerHTML=html;const n=host.firstElementChild,c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}};
 const F=await(async()=>{host.innerHTML=pfoot();const n=host.firstElementChild;if(!n||!host.textContent.trim())return{c:null,h:0};const sp=n.querySelector('span');if(sp&&sp.offsetWidth>W-10)n.style.fontSize=(12*(W-10)/sp.offsetWidth)+'px';const c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}})();
-const Hf=await R(`<div class="mhdw">${hdrH(k)}${infoH(k,m,i)}</div>`),Hm=await R(miniH(k,m,i)),bg=mBg();
+const Hf=await R(`<div class="mhdw">${hdrH(k)}${infoH(k,m,i)}</div>`),Hm=await R(miniH(k,m,i)),bg=mBg(TH);
 const pdf=new jspdf.jsPDF({orientation:'p',unit:'mm',format:'a4'}),maxY=PH-MB-F.h-3;let y=0,ys=0;
 const img=(u,yy)=>pdf.addImage(u.c.toDataURL('image/png'),'PNG',MX,yy,PW-2*MX,u.h);
 const first=()=>{pdf.addImage(bg,'JPEG',0,0,PW,PH);img(Hf,MT);y=ys=MT+Hf.h+2};
@@ -227,11 +245,11 @@ const slice=async u=>{const mm=u.h/u.c.height;let off=0;while(off<u.c.height){le
 const put=async(u,keep)=>{if(!room(u.h,keep))next();if(u.h>maxY-ys+.01)await slice(u);else{img(u,y);y+=u.h}};
 first();
 for(let j=0;j<m.cases.length;j++){const c=m.cases[j],hd=await R(caseHead(c,base+j+1));
-let th=null,rws=[];if(P&&c.rows&&c.rows.length){th=await R(pHead());for(const r of c.rows)rws.push(await R(`<table class="mx mp rw">${mCols}<tbody><tr>${pCells(r)}</tr></tbody></table>`))}
+let th=null,rws=[];if(P&&c.rows&&c.rows.length){th=await R(pHead());const hasR=!rtEmpty(c.report);for(let q=0;q<c.rows.length;q++)rws.push(await R(`<table class="mx mp rw${q==c.rows.length-1&&!hasR?' ls':''}">${mCols}<tbody><tr>${pCells(c.rows[q])}</tr></tbody></table>`))}
 await put(hd,th?Math.min(th.h+rws[0].h,60):0);
 if(th){await put(th,rws[0].h);for(const r of rws){if(!room(r.h)){next();await put(th)}await put(r)}}
 if(!rtEmpty(c.report)){const tmp=document.createElement('div');tmp.innerHTML=cleanHtml(c.report);const nodes=[];[...tmp.childNodes].forEach(n=>{if(n.nodeType==1&&(n.tagName=='UL'||n.tagName=='OL')){[...n.children].forEach((li,x)=>nodes.push({h:`<div class="mli"><span class="mk">${n.tagName=='OL'?(x+1)+'.':'•'}</span><div>${li.innerHTML}</div></div>`}))}else if(n.nodeType==1)nodes.push({h:n.outerHTML});else if(n.nodeType==3&&n.nodeValue.trim())nodes.push({h:`<div>${esc(n.nodeValue)}</div>`})});
-const us=[];for(let q=0;q<nodes.length;q++){const h=nodes[q].h;us.push(await R(`<div class="mrp u${q==0?' f':''}${q==nodes.length-1?' l':''}">${h}</div>`))}
+const us=[];for(let q=0;q<nodes.length;q++){const h=nodes[q].h;us.push(await R(`<div class="mrp u${q==0?' f':''}${q==nodes.length-1?' l':''}${q==0&&th?' j':''}">${h}</div>`))}
 pdf.setDrawColor(51,51,51);pdf.setLineWidth(.26);
 for(let q=0;q<us.length;q++){const u=us[q];if(q>0&&!room(u.h)){pdf.line(MX,y,PW-MX,y);next();pdf.line(MX,y,PW-MX,y)}await put(u,q==0?Math.min(us[1]?us[1].h:0,40):0)}}
 y+=4}
