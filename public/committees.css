@@ -1,0 +1,105 @@
+/* ===== لجنة الانضباط ولجنة التنظيم والمنافسة ===== */
+/* --- المحرر --- */
+.edh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.edh .edt{flex:1;min-width:180px;font-size:18px}
+.mrow{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) auto;gap:0 10px;align-items:end}
+.mrow .btn{margin-bottom:8px;min-height:40px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0 12px}
+.cc{padding:14px;scroll-margin-top:70px}
+.cch{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.cch b{font-size:17px;color:var(--pr);flex:1}
+.ptb{min-width:1020px;table-layout:fixed}
+.ptb th{white-space:normal}
+.ptb td{white-space:normal;vertical-align:top}
+@media(min-width:641px){.ptb td{padding:5px 4px}}
+.ptb input,.ptb textarea{padding:6px 8px;min-height:38px}
+textarea.ag{resize:none;overflow:hidden;min-height:38px;line-height:1.5;display:block}
+.edbar{position:sticky;bottom:0;z-index:12;display:flex;gap:8px;flex-wrap:wrap;padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--bd);margin-top:14px}
+.edbar .btn{min-height:42px;padding:8px 22px}
+.edbar .btn.pr{font-weight:800}
+.edbar .btn.cn{border-color:transparent;background:transparent;color:var(--mt)}
+.fcl{z-index:90}
+.ll{max-height:340px;overflow:auto}
+.li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 4px;border-bottom:1px solid var(--bd)}
+.li:last-child{border-bottom:0}.li>span:first-child{flex:1;min-width:0;overflow-wrap:anywhere}
+/* --- محرر النص المنسق: سطح الكتابة دائمًا بلون الورق ليطابق PDF في كل الأنماط --- */
+.rtw2{border:1px solid var(--bd);border-radius:var(--r);background:var(--cd);overflow:hidden;margin-bottom:6px}
+.rtb{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px;border-bottom:1px solid var(--bd);background:var(--ps)}
+.rtb select{width:auto;min-width:92px;min-height:36px;padding:3px 6px;font-size:13px}
+.rtb .rb{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;padding:0 6px;border:1px solid var(--bd);border-radius:var(--r2);background:var(--cd);color:var(--tx);cursor:pointer;font:inherit;font-size:14px;position:relative;margin:0}
+.rtb .rb:hover{background:var(--ps);border-color:var(--pr)}
+.rtb .rcl input{position:absolute;inset:0;width:100%;height:100%;min-height:0;opacity:0;cursor:pointer;padding:0;border:0}
+.rsep{width:1px;height:22px;background:var(--bd);margin:0 3px}
+.rte{min-height:130px;padding:12px 14px;background:#fff;color:#111;font-family:Cairo,Tahoma,sans-serif;font-size:16px;line-height:1.9;outline:0;overflow-wrap:anywhere;direction:rtl;text-align:right;color-scheme:light}
+.rte.big{min-height:240px}
+.rte:focus{box-shadow:inset 0 0 0 2px var(--pr)}
+.rte p,.rte div{margin:0}.rte ul,.rte ol{margin:0;padding-inline-start:28px}
+/* --- معاينة المحضر (ورقة بيضاء دائمًا) --- */
+.pv.mpv{max-width:880px;margin:10px auto 24px;padding:30px 32px 14px;background:#fff var(--mbg,none) top/100% auto no-repeat;direction:rtl;font-family:Cairo,Tahoma,sans-serif;border-radius:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.mpt{width:100%;border-collapse:collapse;border:0;table-layout:fixed}
+.pv .mpt>thead>tr>td,.pv .mpt>tbody>tr>td,.pv .mpt>tfoot>tr>td{border:0;padding:0;text-align:inherit;white-space:normal;background:none;vertical-align:top;outline:0}
+.pv .mpt thead td.sp{height:2px}
+.pv .mpt tfoot td.sp{padding-top:4px}
+.pv .mpt td.em{text-align:center;color:#666;padding:24px}
+.mfx{display:none}
+.mhd{display:flex;align-items:center;justify-content:center;gap:18px;margin:0 0 2px}
+.mhd img{max-height:100px;max-width:130px;object-fit:contain}
+.mhd .ml{text-align:center;line-height:1.55}
+.mhd .ml b{display:block;font-weight:800;font-size:17px;color:#1d2b33}
+.mhd .ml b.g{color:#0b6e4f;font-size:20px}
+.pv .mtt{text-align:center;font-weight:800;font-size:46px;color:#0b6e4f;line-height:1.35;margin:6px 0 10px}
+.mif{display:flex;justify-content:space-between;gap:12px;font-weight:800;font-size:15px;margin:6px 4px 4px}
+.mmb{font-weight:800;font-size:15px;margin:4px 4px;line-height:1.9}
+.mst{font-weight:800;font-size:16px;text-align:center;margin:10px 0 8px}
+i.mdr{font-style:normal;border:1px solid #b45f06;color:#b45f06;border-radius:10px;padding:0 8px;font-size:12px;font-weight:600}
+.mcs{margin:0 0 14px}
+.mch{display:flex;gap:10px;align-items:stretch;margin-bottom:6px}
+.mch .mca{flex:0 0 49%}.mch .mcb{flex:1;min-width:0}
+.pv table.mx{border-collapse:collapse;width:100%;table-layout:fixed;border:0}
+.pv table.mx th,.pv table.mx td{border:1px solid #333;padding:4px 6px;text-align:center;vertical-align:middle;white-space:normal;font-size:14px;line-height:1.5;overflow-wrap:anywhere;color:#111}
+.pv table.mx th{background:#fbdcc8;font-weight:800}
+.pv table.mx td{background:#fff6e0;font-weight:600}
+.pv table.mcr,.mch .mcb table.mx{height:100%}
+.pv table.mp th{font-size:13px}
+.pv table.mp td{font-size:13.5px;background:#fffaf0}
+.pv table.mp.rw td,.pv table.mp.rw{border-top:0}
+.pv table.mp.rw td{border-top:0}
+.mcs .tw{overflow-x:auto;background:none;border:0;border-radius:0;box-shadow:none}
+.mcs .tw table.mp{min-width:640px}
+.pv .mrp{border:1px solid #333;padding:8px 14px;margin-top:6px;font-size:15px;line-height:1.95;text-align:right;direction:rtl;overflow-wrap:anywhere;background:#fff;color:#111}
+.pv .mcs .tw+.mrp{margin-top:0;border-top:0}
+.mrp p,.mrp div{margin:0}.mrp ul,.mrp ol{margin:0;padding-inline-start:28px}.mrp li{margin:0}
+.pv .mrp.u{margin:0;border-top:0;border-bottom:0;padding-top:0;padding-bottom:0}
+.pv .mrp.u.f{border-top:1px solid #333;padding-top:8px}
+.pv .mrp.u.l{border-bottom:1px solid #333;padding-bottom:8px}
+.mmini{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:14px;color:#0b6e4f;border-bottom:2px solid #0b6e4f;padding:2px 4px 5px}
+.mpv .ct{margin-top:10px}
+@media(max-width:640px){
+.pv.mpv{padding:14px 10px 8px}
+.pv .mtt{font-size:28px}
+.mhd .ml b{font-size:14px}.mhd .ml b.g{font-size:16px}.mhd img{max-height:64px}
+.mch{flex-direction:column}.mch .mca{flex:none}
+.ptb{min-width:0}
+.rt.ptb td{padding:6px 0;padding-inline-start:0;min-height:0}.rt.ptb td::before{position:static;display:block;width:auto;margin-bottom:3px}.rt.ptb td.ac{padding-top:8px}
+.mrow{grid-template-columns:1fr}
+.mrow .btn{margin:-2px 0 10px}
+.edbar .btn{flex:1 1 40%}.edbar .btn.pr{flex:1 1 100%;order:-1}
+.rtb select{flex:1 1 40%}
+}
+@media(pointer:coarse){.rtb .rb{min-width:40px;min-height:40px}}
+/* --- الطباعة: ترويسة/زخرفة أولى + تذييل متكرر في كل صفحة --- */
+@media print{
+.pv.mpv{border:0;border-radius:0;box-shadow:none;max-width:none;margin:0;padding:0 12mm!important;background:none!important;overflow:visible}
+.mfx{display:block;position:fixed;top:0;left:0;width:210mm;height:297mm;z-index:-1;background:var(--mbg) 0 0/100% 100% no-repeat;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pv .mpt thead td.sp{height:13mm}
+.pv .mpt tfoot td.sp{padding-top:3mm;padding-bottom:9mm}
+.mpt>tbody>tr{break-inside:auto}
+.mch,.pv table.mx tr{break-inside:avoid}
+.mch{break-after:avoid}
+.mcs .tw{overflow:visible}
+.mcs .tw table.mp{min-width:0}
+.pv table.mx th,.pv table.mx td,.pv .mtt,.mhd .ml b.g,.mmini{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+.ltr{display:inline-block;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+.mli{display:flex;gap:8px;padding-inline-start:12px}.mli .mk{flex:none}.mli>div{flex:1;min-width:0}
