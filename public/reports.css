@@ -1,0 +1,112 @@
+/* ===== تصدير تعيينات الحكام إلى PDF بأنماط متعددة (وحدة مستقلة: reports.js) =====
+   كل المحددات تبدأ بـ .rp- أو .rpx- فلا تتأثر بها بقية الواجهة ولا تصدير اللجان. */
+
+/* --- الصفحة (A4): تُستعمل نفسها في المعاينة والطباعة وPDF --- */
+.rp-pg{position:relative;overflow:hidden;direction:rtl;text-align:right;font-family:Cairo,Tajawal,Tahoma,sans-serif;color:var(--tx,#111);background:#fff;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;line-height:1.5}
+.rp-pg *{box-sizing:border-box}
+.rp-bg{position:absolute;left:0;top:0;width:100%;height:100%;display:block;max-width:none}
+.rp-in{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column}
+.rp-body{flex:1;min-height:0;overflow:hidden}
+
+/* الترويسة */
+.rp-hd{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:6px}
+.rp-lg{display:flex;align-items:center;gap:12px;flex:none}
+.rp-lg img{max-height:84px;max-width:118px;object-fit:contain}
+.rp-ll{line-height:1.5;text-align:center}
+.rp-ll b{display:block;font-weight:800;font-size:15px;color:var(--tx,#111)}
+.rp-ll b.rp-gg{color:var(--hd);font-size:17px}
+.rp-ti{text-align:center;flex:1;min-width:0}
+.rp-ti h1{margin:0;font-size:38px;font-weight:800;line-height:1.3;color:var(--hd)}
+.rp-ti .rp-pt{display:inline-block;margin-top:4px;padding:2px 16px;border-radius:999px;background:var(--hd);color:var(--hdx);font-weight:800;font-size:15px}
+.rp-ti .rp-sb{margin-top:4px;font-size:13.5px;font-weight:700;color:var(--tx,#111)}
+.rp-mh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 4px 5px;margin-bottom:2px;border-bottom:2px solid var(--hd);font-weight:800;font-size:14px;color:var(--hd)}
+
+/* شريط المجموعة: رقائق الجولة / الصنف / المجموعة */
+.rp-g{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:12px 0 6px}
+.rp-g span{border-radius:8px;padding:2px 14px;font-weight:800;font-size:15px;line-height:1.6;border:1.5px solid var(--bd)}
+.rp-g .rp-c1{background:var(--hd);color:var(--hdx)}
+.rp-g .rp-c2{background:var(--th);color:var(--thx)}
+.rp-g .rp-c3{background:#fff;color:var(--hd)}
+.rp-g small{font-weight:600;font-size:12px;color:var(--tx)}
+
+/* الجداول: حواف مستديرة خفيفة في كل الأنماط */
+.rp-t{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:13.5px}
+.rp-pg.sm .rp-t{font-size:11.5px}
+.rp-t th,.rp-t td{padding:6px 5px;text-align:center;vertical-align:middle;white-space:normal;overflow-wrap:anywhere;line-height:1.45;color:var(--tx,#111)}
+.rp-t th{background:var(--th);color:var(--thx);font-weight:800;font-size:14px}
+.rp-pg.sm .rp-t th{font-size:12px}
+.rp-t td{background:#fff;font-weight:600;min-height:34px}
+.rp-t tbody tr:nth-child(even) td{background:var(--zb)}
+.rp-t td b{font-weight:800}
+.rp-t td.rp-nr{color:#777;font-weight:600;font-style:italic}
+.rp-t td.rp-rf{font-weight:700}
+.rp-t .rp-lb{display:inline-block;border-radius:10px;padding:0 8px;font-size:11px;font-weight:700;background:#e7eefb;color:#24407a;border:1px solid #24407a;margin-inline-start:4px}
+.rp-m{display:inline-flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px}
+.rp-m img.tl{height:22px;width:auto;max-width:32px;object-fit:contain}
+.rp-m i{font-style:normal;font-weight:800;color:var(--hd)}
+/* نمط الشبكة: إطار خارجي مستدير وخطوط داخلية رفيعة */
+.rp-t.grid{border:1.5px solid var(--bd);border-radius:var(--rr,8px)}
+.rp-t.grid th:not(:last-child),.rp-t.grid td:not(:last-child){border-inline-end:1px solid var(--bd)}
+.rp-t.grid tbody td{border-top:1px solid var(--bd)}
+.rp-t.grid thead th:first-child{border-top-right-radius:calc(var(--rr,8px) - 1px)}
+.rp-t.grid thead th:last-child{border-top-left-radius:calc(var(--rr,8px) - 1px)}
+.rp-t.grid tbody tr:last-child td:first-child{border-bottom-right-radius:calc(var(--rr,8px) - 1px)}
+.rp-t.grid tbody tr:last-child td:last-child{border-bottom-left-radius:calc(var(--rr,8px) - 1px)}
+/* نمط الخلايا المنفصلة (مثل التصميم المرجعي): كل خلية مستديرة بحدودها */
+.rp-t.pill{border-spacing:4px 4px;margin:-4px;width:calc(100% + 8px)}
+.rp-t.pill th,.rp-t.pill td{border:1.5px solid var(--bd);border-radius:var(--rr,8px)}
+
+/* التذييل */
+.rp-ft{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;border-top:2px solid var(--hd);padding-top:5px;margin-top:6px;min-height:28px;font-size:12px;color:var(--tx,#111);white-space:nowrap}
+.rp-ft .rp-fc{flex:1;text-align:center;overflow:hidden}
+.rp-ft .rp-nt{font-size:11.5px;color:#444;margin-bottom:1px;white-space:normal}
+.rp-ft .rp-pn{flex:none;border-radius:999px;border:1.5px solid var(--bd);background:var(--th);color:var(--thx);font-weight:800;padding:0 12px;font-size:12px}
+
+/* --- نافذة المعاينة والتصدير --- */
+.rpx{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;background:var(--bg,#f3f5f2);color:var(--tx,#111);font-family:Cairo,Tajawal,Tahoma,sans-serif;direction:rtl}
+.rpx *{box-sizing:border-box}
+.rpx-top{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cd,#fff);border-bottom:1px solid var(--bd,#d9e0da)}
+.rpx-top b{flex:1;font-size:16px}
+.rpx-main{flex:1;min-height:0;display:flex;gap:12px;padding:12px}
+.rpx-side{flex:0 0 340px;max-width:100%;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.rpx-side details{background:var(--cd,#fff);border:1px solid var(--bd,#d9e0da);border-radius:var(--r,10px);padding:8px 12px}
+.rpx-side summary{cursor:pointer;font-weight:800;font-size:14px;padding:2px 0}
+.rpx-side label{display:block;font-size:12.5px;margin:8px 0 0;font-weight:600}
+.rpx-side select,.rpx-side input[type=text]{width:100%;margin-top:3px;min-height:36px}
+.rpx-sty{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.rpx-sty button,.rpx-pal button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 6px;border:1px solid var(--bd,#d9e0da);border-radius:var(--r2,8px);background:var(--cd,#fff);color:inherit;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;margin:0}
+.rpx-sty button:hover,.rpx-pal button:hover{border-color:var(--pr,#0b6e4f)}
+.rpx-sty button.on,.rpx-pal button.on{border-color:var(--pr,#0b6e4f);box-shadow:0 0 0 2px var(--pr,#0b6e4f)}
+.rpx-sty canvas,.rpx-sty img{width:100%;height:auto;aspect-ratio:3/2;border-radius:6px;border:1px solid rgba(0,0,0,.15);display:block}
+.rpx-pal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.rpx-pal .sw{display:flex;width:100%;height:18px;border-radius:5px;overflow:hidden;border:1px solid rgba(0,0,0,.25)}
+.rpx-pal .sw i{flex:1}
+.rpx-col{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-top:8px}
+.rpx-col label{margin:0;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.rpx-col input[type=color]{width:42px;min-width:42px;height:32px;padding:0;border:1px solid var(--bd,#ccc);border-radius:6px;background:none;margin:0;cursor:pointer}
+.rpx-pv{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.rpx-nav{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700;font-size:14px}
+.rpx-nav button{min-width:40px}
+.rpx-stage{flex:1;min-height:0;overflow:auto;background:#cfd6d1;border-radius:var(--r,10px);padding:14px;display:flex;justify-content:center;align-items:flex-start}
+.rpx-sc{position:relative;flex:none;direction:ltr;box-shadow:0 4px 18px rgba(0,0,0,.28);background:#fff}
+.rpx-sc>.rp-pg{position:absolute;left:0;top:0;transform-origin:0 0}
+.rpx-msg{padding:30px;text-align:center;color:#444}
+.rpx-act{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:var(--cd,#fff);border-top:1px solid var(--bd,#d9e0da)}
+.rpx-act .btn{min-height:42px;padding:8px 22px}
+@media(max-width:820px){
+.rpx-main{flex-direction:column;overflow:auto}
+.rpx-side{flex:none;overflow:visible}
+.rpx-pv{flex:none}
+.rpx-stage{flex:none;padding:8px}
+.rpx-act .btn{flex:1 1 40%}
+}
+
+/* --- الطباعة المباشرة: لا يظهر إلا حاوي الصفحات --- */
+#rpxPrint{display:none}
+@media print{
+body.rp-printing>*:not(#rpxPrint){display:none!important}
+body.rp-printing #rpxPrint{display:block!important}
+body.rp-printing{background:#fff!important}
+#rpxPrint .rp-pg{break-after:page;page-break-after:always;margin:0}
+#rpxPrint .rp-pg:last-child{break-after:auto;page-break-after:auto}
+}
