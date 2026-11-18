@@ -70,10 +70,12 @@ const unsetTxt=()=>S.set.unset||'غير معين';
 function hdrLines(){const s=S.set;let L=[s.mh1,s.mh2,s.mh3].filter(Boolean);if(!L.length)L=[s.l1].filter(Boolean);return L}
 function footParts(){const s=S.set;return[['ph','phS','phL'],['em','emS','emL'],['web','webS','webL'],['ad','adS','adL']].filter(x=>s[x[0]]).map(x=>(s[x[1]]&&s[x[2]]?`<b>${esc(s[x[2]])}:</b> `:'')+`<bdi>${esc(s[x[0]])}</bdi>`)}
 const RL=['الحكم الرئيسي','الحكم المساعد الأول','الحكم المساعد الثاني'];
-function cols(wr,land){return wr?(land?[11,13,26,9,8,11,11,11]:[11,12,25,9,8,11.7,11.7,11.6]):[15,20,36,14,15]}
+function cols(wr,land){return wr?(land?[9,11,32,8,7,11,11,11]:[9,10,31,8,7,11.7,11.7,11.6]):[13,16,46,12,13]}
 function thead(wr,land){const w=cols(wr,land),h=['التاريخ','الملعب','المقابلة','الصنف','التوقيت',...(wr?RL:[])];return `<colgroup>${w.map(a=>`<col style="width:${a}%">`).join('')}</colgroup><thead><tr>${h.map(t=>`<th>${t}</th>`).join('')}</tr></thead>`}
 function rowH(m,wr){const lt=m.status=='moved'||m.status=='postponed';
 return `<tr><td>${esc(fd(m.date))}</td><td>${esc(nm('stad',m.stad))}</td><td><span class="rp-m">${tl(m.t1)}<b>${esc(nm('teams',m.t1))}</b><i>×</i><b>${esc(nm('teams',m.t2))}</b>${tl(m.t2)}</span>${lt?' <span class="rp-lb">مقابلة متأخرة</span>':''}${m.done?' <span class="rp-lb" style="background:#e6f4ea;color:#2e7d32;border-color:#2e7d32">✔ لُعبت</span>':''}</td><td>${esc(nm('cats',m.cat))}</td><td>${esc(ft(m.time))}</td>${wr?m.refs.map(r=>r?`<td class="rp-rf">${esc(nm('ref',r))}</td>`:`<td class="rp-nr">${esc(unsetTxt())}</td>`).join(''):''}</tr>`}
+/* إبقاء المقابلة في سطر واحد: يُصغَّر الخط تدريجيًا (حتى حد أدنى مقروء) إن لم يتسع الاسمان */
+function fitM(el){if(!el)return;const b=el.querySelectorAll('b');if(b.length<2)return;let fs=parseFloat(getComputedStyle(el).fontSize)||13;while(fs>9.5&&Math.abs(b[0].offsetTop-b[1].offsetTop)>4){fs-=.5;el.style.fontSize=fs+'px';el.style.gap='4px'}}
 function groups(list){const gs={};sorted(list).forEach(m=>(gs[m.round+'|'+m.cat+'|'+m.grp]??=[]).push(m));return Object.values(gs)}
 
 /* ----- بناء الصفحات (ترقيم الصفحات بقياس الارتفاع الفعلي: لا قص ولا تداخل) ----- */
@@ -94,7 +96,7 @@ for(const g of groups(list)){const m0=g[0];let i=0,cont=false;
  while(i<g.length){const body=pg._b,wrap=document.createElement('div');
   wrap.innerHTML=`<div class="rp-g"><span class="rp-c1">${esc(nm('rounds',m0.round))}</span><span class="rp-c2">${esc(nm('cats',m0.cat))}</span><span class="rp-c3">${esc(gn(m0.cat,m0.grp))}</span>${cont?'<small>(تابع)</small>':''}</div><table class="rp-t ${ST.tbl}">${thead(wr,land)}<tbody></tbody></table>`;
   body.appendChild(wrap);const tb=wrap.querySelector('tbody');let added=0;
-  while(i<g.length){tb.insertAdjacentHTML('beforeend',rowH(g[i],wr));if(body.scrollHeight>body.clientHeight+.5&&(added||body.children.length>1)){tb.lastElementChild.remove();break}i++;added++}
+  while(i<g.length){tb.insertAdjacentHTML('beforeend',rowH(g[i],wr));fitM(tb.lastElementChild.querySelector('.rp-m'));if(body.scrollHeight>body.clientHeight+.5&&(added||body.children.length>1)){tb.lastElementChild.remove();break}i++;added++}
   if(!added){body.removeChild(wrap);pg=newPage();continue}
   cont=true;if(i<g.length)pg=newPage()}}
 /* التذييل: بيانات الرابطة كما في الملفات السابقة + ترقيم الصفحات */
