@@ -99,6 +99,7 @@ for(const g of groups(list,wr)){const m0=g[0];let i=0,cont=false;
   while(i<g.length){tb.insertAdjacentHTML('beforeend',rowH(g[i],wr));fitM(tb.lastElementChild.querySelector('.rp-m'));if(body.scrollHeight>body.clientHeight+.5&&(added||body.children.length>1)){tb.lastElementChild.remove();break}i++;added++}
   if(!added){body.removeChild(wrap);pg=newPage();continue}
   cont=true;if(i<g.length)pg=newPage()}}
+for(let k=pages.length-1;k>0;k--)if(!pages[k]._b.children.length){pages[k].remove();pages.splice(k,1)}/* لا صفحات فارغة */
 /* التذييل: بيانات الرابطة كما في الملفات السابقة + ترقيم الصفحات */
 const fp=footParts(),n=pages.length;
 pages.forEach((el,k)=>{const ct=el.querySelector('.rp-fc');ct.innerHTML=(S.set.footer?`<div class="rp-nt">${esc(S.set.footer)}</div>`:'')+(fp.length?`<span>${fp.join(' &nbsp;|&nbsp; ')}</span>`:'');
@@ -152,16 +153,38 @@ if(b.dataset.sty){const id=b.dataset.sty,d=STY[id];ST.style=id;if(id!='custom'){
 else if(b.dataset.pal){const p=PAL[b.dataset.pal];ST.col=palCol(p,ST.lay);persist();drawSide();rr()}}
 
 /* ----- التصدير ----- */
-async function pdf(){const list=scoped();if(!list.length)return toast('لا توجد مقابلات للتصدير');
+/* سبب ملف PDF الأبيض: كانت الصفحات تُبنى داخل tmpHost() وهي visibility:hidden؛ وhtml2canvas لا يرسم أي عنصر (ولا أبناءه) رؤيته hidden فيعيد لوحة بيضاء.
+   الإصلاح: حاوية تصدير خارج الشاشة لكن مرئية، مع فرض الرؤية في النسخة المستنسخة، وتحقق من المحتوى قبل الإنشاء ومن كل صورة بعد الالتقاط. */
+let BUSY=false;
+const pdfHost=on=>{const h=document.createElement('div');h.style.cssText=`position:absolute;left:${on?0:-30000}px;top:0;z-index:-1;pointer-events:none;visibility:visible;opacity:1;background:#fff`;document.body.appendChild(h);return h};
+const forceVis=el=>{for(let n=el;n&&n.style;n=n.parentElement){n.style.visibility='visible';n.style.opacity='1';if(n.style.display=='none')n.style.display='block'}};
+const nextFrame=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+const waitImgs=el=>Promise.all([...el.querySelectorAll('img')].map(i=>i.complete&&i.naturalWidth?0:new Promise(r=>{i.addEventListener('load',r,{once:true});i.addEventListener('error',r,{once:true});setTimeout(r,4000)})));
+/* التقرير جاهز: صفحات ذات أبعاد فعلية وفيها صفوف جداول */
+const ready=pages=>pages.length>0&&pages.every(p=>p.offsetWidth>0&&p.offsetHeight>0)&&pages.some(p=>p.querySelector('.rp-t tbody tr'));
+/* لوحة بيضاء بالكامل؟ (تصغير ثم عدّ البكسلات غير البيضاء) */
+function blank(cv){try{const w=80,h=Math.max(1,Math.round(w*cv.height/cv.width)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(cv,0,0,w,h);const d=x.getImageData(0,0,w,h).data;let n=0;for(let i=0;i<d.length;i+=4)if(d[i]<245||d[i+1]<245||d[i+2]<245)n++;return n<12}catch(e){return false}}
+function pdfBtn(on){if(!UI)return;const b=UI.querySelector('[data-x=pdf]');if(!b)return;if(on){b._t=b.textContent;b.textContent='جارٍ تجهيز PDF...';b.disabled=true;b.setAttribute('aria-busy','true')}else{b.textContent=b._t||'⬇ تحميل PDF';b.removeAttribute('aria-busy');b.disabled=!scoped().length}}
+async function pdf(){if(BUSY)return;const list=scoped();if(!list.length)return toast('لا توجد مقابلات للتصدير');
 if(!window.jspdf||!window.html2canvas)return toast('تعذر تحميل مكتبة PDF، تحقق من الاتصال');
-const host=tmpHost();let dl=null;try{dl=window.claude?await window.claude.use('downloads'):null}catch(e){}
+BUSY=true;pdfBtn(true);let host=null,dl=null;
+try{dl=window.claude?await window.claude.use('downloads'):null}catch(e){}
 if(!dl)dl={save:async o=>{const a=document.createElement('a');a.href=URL.createObjectURL(o.data);a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}};
-try{toast('جارٍ إنشاء الملف…');await document.fonts.ready;if(window.iconsReady)await iconsReady;
-const land=isLand(),r=build(list,O.wr,land,host),A4=land?[297,210]:[210,297],doc=new jspdf.jsPDF({orientation:land?'l':'p',unit:'mm',format:'a4'});
-for(let i=0;i<r.pages.length;i++){const cv=await html2canvas(r.pages[i],{scale:2,backgroundColor:'#ffffff',width:r.W,height:r.H,windowWidth:r.W});if(i)doc.addPage();doc.addImage(cv.toDataURL('image/jpeg',.95),'JPEG',0,0,A4[0],A4[1])}
+try{toast('جارٍ تجهيز PDF...');await document.fonts.ready;if(window.iconsReady)await iconsReady;
+const land=isLand(),A4=land?[297,210]:[210,297];let res=null,on=false;
+/* المحاولة 1: حاوية خارج الشاشة. إن خرجت صفحة بيضاء تُعاد المحاولة مرة واحدة بحاوية داخل نطاق الشاشة (خلف الواجهة) */
+for(let at=0;at<2&&!res;at++){if(host)host.remove();host=pdfHost(on);const r=build(list,O.wr,land,host);
+if(!ready(r.pages))throw Object.assign(new Error('تعذر تجهيز محتوى التقرير'),{code:'empty'});
+await waitImgs(host);await nextFrame();const out=[];let bad=false;
+for(const pg of r.pages){const cv=await html2canvas(pg,{scale:2,backgroundColor:'#ffffff',width:r.W,height:r.H,windowWidth:r.W,useCORS:true,logging:false,onclone:(d,el)=>forceVis(el)});if(blank(cv)){bad=true;break}out.push(cv)}
+if(bad)on=true;else res=out}
+if(!res)throw Object.assign(new Error('الصفحات المُنتَجة فارغة'),{code:'blank'});
+const doc=new jspdf.jsPDF({orientation:land?'l':'p',unit:'mm',format:'a4'});
+res.forEach((cv,i)=>{if(i)doc.addPage();doc.addImage(cv.toDataURL('image/jpeg',.95),'JPEG',0,0,A4[0],A4[1])});
 const nmx=[O.wr?'تعيينات-الحكام':'برنامج-المقابلات',O.cat&&nm('cats',O.cat),O.date&&O.date].filter(Boolean).join('-').replace(/\s+/g,'-');
-host.remove();await dl.save({filename:nmx+'.pdf',data:doc.output('blob')});toast('تم حفظ الملف')}
-catch(e){console.error(e);if(!e||e.code!='declined')toast('تعذر إنشاء الملف')}finally{host.remove()}}
+host.remove();host=null;await dl.save({filename:nmx+'.pdf',data:doc.output('blob')});toast('تم حفظ الملف')}
+catch(e){console.error(e);if(!e||e.code!='declined')toast(e&&(e.code=='empty'||e.code=='blank')?'⛔ تعذر تجهيز محتوى التقرير، لم يُنشأ أي ملف. أغلق المعاينة وافتحها ثم أعد المحاولة':'تعذر إنشاء الملف')}
+finally{if(host)host.remove();BUSY=false;pdfBtn(false)}}
 function print(){const list=scoped();if(!list.length)return toast('لا توجد مقابلات للطباعة');
 let box=document.getElementById('rpxPrint');if(box)box.remove();box=document.createElement('div');box.id='rpxPrint';document.body.appendChild(box);
 const land=isLand(),r=build(list,O.wr,land,box),st=document.createElement('style');st.id='rpxPg';st.textContent=`@page{size:A4 ${land?'landscape':'portrait'};margin:0}`;document.head.appendChild(st);
