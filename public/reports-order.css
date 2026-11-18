@@ -1,0 +1,24 @@
+/* ===== ترتيب التقارير بالسحب والإفلات (reports-order.js) — كل المحددات تبدأ بـ .rpo ===== */
+.rpo{border:1px solid var(--bd,#d0d5dd);border-radius:10px;padding:6px 10px;margin:8px 0;background:var(--cd,#fff);color:inherit;text-align:right}
+.rpo>summary{cursor:pointer;font-weight:800;padding:8px 2px;min-height:40px}
+.rpo details{margin:6px 0;border-top:1px dashed var(--bd,#d0d5dd);padding-top:4px}
+.rpo details>summary{cursor:pointer;font-weight:700;padding:6px 2px;min-height:36px}
+.rpo label{display:block;margin:6px 0;font-size:13px}
+.rpo select{width:100%;max-width:100%;min-height:38px}
+.rpo-n{margin:4px 0 6px;font-size:12.5px;color:var(--mt,#666);line-height:1.7}
+.rpo-h{margin:10px 0 4px;font-weight:800;font-size:13px}
+.rpo-b{margin:8px 0 4px}
+.rpo-l{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.rpo-l li{position:relative;display:flex;align-items:center;gap:10px;padding:6px 10px;border:1px solid var(--bd,#d0d5dd);border-radius:8px;background:var(--cd,#fff);touch-action:pan-y}
+.rpo-l li.off{opacity:.6}
+.rpo-l li.drg{z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.25);border-color:var(--ca,#1aa876);opacity:.95}
+.rpo-l li.dtop{box-shadow:0 -3px 0 var(--ca,#1aa876)}
+.rpo-l li.dbot{box-shadow:0 3px 0 var(--ca,#1aa876)}
+.rpo-l .rgr{cursor:grab;font-size:20px;line-height:1;padding:8px 6px;touch-action:none;user-select:none;-webkit-user-select:none;color:var(--mt,#666)}
+.rpo-l .rgr:active{cursor:grabbing}
+.rpo-l .rtx{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:700}
+.rpo-l .rsb{flex:none;color:var(--mt,#666);font-size:12px}
+.rpo-l .rbt{display:flex;gap:4px;flex:none}
+.rpo-l .rbt .btn{min-height:34px;min-width:34px;padding:2px 9px}
+@media(max-width:640px){.rpo-l li{flex-wrap:wrap}.rpo-l .rsb{order:5;flex-basis:100%}}
+@media print{.rpo{display:none!important}}

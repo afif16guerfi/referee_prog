@@ -76,7 +76,7 @@ function rowH(m,wr){const lt=m.status=='moved'||m.status=='postponed';
 return `<tr><td>${esc(fd(m.date))}</td><td>${esc(nm('stad',m.stad))}</td><td><span class="rp-m">${tl(m.t1)}<b>${esc(nm('teams',m.t1))}</b><i>×</i><b>${esc(nm('teams',m.t2))}</b>${tl(m.t2)}</span>${lt?' <span class="rp-lb">مقابلة متأخرة</span>':''}${m.done?' <span class="rp-lb" style="background:#e6f4ea;color:#2e7d32;border-color:#2e7d32">✔ لُعبت</span>':''}</td><td>${esc(nm('cats',m.cat))}</td><td>${esc(ft(m.time))}</td>${wr?m.refs.map(r=>r?`<td class="rp-rf">${esc(nm('ref',r))}</td>`:`<td class="rp-nr">${esc(unsetTxt())}</td>`).join(''):''}</tr>`}
 /* إبقاء المقابلة في سطر واحد: يُصغَّر الخط تدريجيًا (حتى حد أدنى مقروء) إن لم يتسع الاسمان */
 function fitM(el){if(!el)return;const b=el.querySelectorAll('b');if(b.length<2)return;let fs=parseFloat(getComputedStyle(el).fontSize)||13;while(fs>9.5&&Math.abs(b[0].offsetTop-b[1].offsetTop)>4){fs-=.5;el.style.fontSize=fs+'px';el.style.gap='4px'}}
-function groups(list){const gs={};sorted(list).forEach(m=>(gs[m.round+'|'+m.cat+'|'+m.grp]??=[]).push(m));return Object.values(gs)}
+function groups(list,wr){if(window.RPO)return RPO.blocks(list,wr).map(b=>b.ms);const gs={};sorted(list).forEach(m=>(gs[m.round+'|'+m.cat+'|'+m.grp]??=[]).push(m));return Object.values(gs)}
 
 /* ----- بناء الصفحات (ترقيم الصفحات بقياس الارتفاع الفعلي: لا قص ولا تداخل) ----- */
 function build(list,wr,land,host){
@@ -92,7 +92,7 @@ const newPage=()=>{const el=document.createElement('div');el.className='rp-pg'+(
 el.innerHTML=`<img class="rp-bg" src="${bgU}" alt=""><div class="rp-in" style="padding:${pt}px ${px}px ${pb}px"><div class="rp-top">${pages.length?mini():first()}</div><div class="rp-body"></div><div class="rp-ft"><div class="rp-fc"></div><span class="rp-pn"></span></div></div>`;
 host.appendChild(el);el._b=el.querySelector('.rp-body');pages.push(el);return el};
 let pg=newPage();
-for(const g of groups(list)){const m0=g[0];let i=0,cont=false;
+for(const g of groups(list,wr)){const m0=g[0];let i=0,cont=false;
  while(i<g.length){const body=pg._b,wrap=document.createElement('div');
   wrap.innerHTML=`<div class="rp-g"><span class="rp-c1">${esc(nm('rounds',m0.round))}</span><span class="rp-c2">${esc(nm('cats',m0.cat))}</span><span class="rp-c3">${esc(gn(m0.cat,m0.grp))}</span>${cont?'<small>(تابع)</small>':''}</div><table class="rp-t ${ST.tbl}">${thead(wr,land)}<tbody></tbody></table>`;
   body.appendChild(wrap);const tb=wrap.querySelector('tbody');let added=0;
@@ -139,7 +139,7 @@ return `<details open><summary>المحتوى والنطاق</summary>
 <div class="rpx-col">${[['bg','لون الخلفية'],['frame','لون الإطار الخارجي'],['head','لون الترويسة'],['th','لون عناوين الجداول'],['tx','لون النصوص']].map(a=>`<label>${a[1]}<input type="color" data-c="${a[0]}" value="${ST.col[a[0]]}"></label>`).join('')}</div>
 <label>هندسة الخلفية<select data-k="lay">${Object.keys(LAYN).map(k=>`<option value="${k}"${ST.lay==k?' selected':''}>${LAYN[k]}</option>`).join('')}</select></label>
 <label>شكل الجدول<select data-k="tbl"><option value="grid"${ST.tbl=='grid'?' selected':''}>شبكة بإطار مستدير</option><option value="pill"${ST.tbl=='pill'?' selected':''}>خلايا مستديرة منفصلة</option></select></label>
-<p style="font-size:12px;color:#555;margin:8px 0 0">حواف الجداول مستديرة قليلًا في كل الأنماط. يُحفظ آخر تصميم تلقائيًا.</p></details>`}
+<p style="font-size:12px;color:#555;margin:8px 0 0">حواف الجداول مستديرة قليلًا في كل الأنماط. يُحفظ آخر تصميم تلقائيًا.</p></details>${window.RPO?RPO.panel(O.wr,scoped()):''}`}
 function drawSide(){const s=UI.querySelector('.rpx-side');s.innerHTML=side();s.querySelectorAll('[data-sty] .th').forEach(sp=>{sp.replaceWith(styThumb(sp.parentNode.dataset.sty))})}
 function onSide(e){const t=e.target;const k=t.dataset&&t.dataset.k,c=t.dataset&&t.dataset.c;
 if(c){ST.col[c]=t.value;ST.style=ST.style=='custom'?'custom':ST.style;persist();rr();return}
@@ -180,5 +180,6 @@ document.addEventListener('keydown',kd);addEventListener('resize',rs);
 (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>{if(!UI)return;drawSide();render()})};
 const kd=e=>{if(!UI)return;if(e.key=='Escape')X.close();else if(e.key=='ArrowLeft'&&CUR<PG.length-1){CUR++;show()}else if(e.key=='ArrowRight'&&CUR>0){CUR--;show()}};
 const rs=()=>{if(UI&&PG.length)show()};
+X.refresh=()=>{if(!UI)return;const s=UI.querySelector('.rpx-side'),y=s?s.scrollTop:0;drawSide();if(s)s.scrollTop=y;CUR=0;render()};
 X.close=()=>{if(!UI)return;clearTimeout(TMR);UI.remove();UI=null;PG=[];document.body.style.overflow='';document.removeEventListener('keydown',kd);removeEventListener('resize',rs)};
 })();
