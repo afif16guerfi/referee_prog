@@ -1,4 +1,4 @@
-const express=require('express'),{MongoClient}=require('mongodb'),bcrypt=require('bcryptjs'),jwt=require('jsonwebtoken'),path=require('path');
+const express=require('express'),{MongoClient}=require('mongodb'),bcrypt=require('bcryptjs'),jwt=require('jsonwebtoken'),path=require('path'),{validateSeason}=require('./validators');
 const {MONGODB_URI,JWT_SECRET,SETUP_CODE,DB_NAME='referee_assign',PORT=3000}=process.env;
 if(!MONGODB_URI||!JWT_SECRET||!SETUP_CODE){console.error('Missing env: MONGODB_URI, JWT_SECRET, SETUP_CODE');process.exit(1)}
 const app=express();app.disable('x-powered-by');app.set('trust proxy',1);app.use(express.json({limit:'15mb'}));
@@ -46,6 +46,8 @@ await col.updateOne({_id:'seasons','list.id':id},{$set:{'list.$.name':name}});r.
 const sid=async(q,r)=>{const s=await ensureSeasons(),id=q.query.season||s.active;if(!s.list.some(x=>x.id===id)){r.status(404).json({error:'الموسم غير موجود'});return null}return id};
 app.get('/api/data',auth,W(async(q,r)=>{const id=await sid(q,r);if(!id)return;const d=await col.findOne({_id:SK(id)});r.json({data:d?d.data:null,season:id})}));
 app.put('/api/data',auth,W(async(q,r)=>{const id=await sid(q,r);if(!id)return;const d=q.body&&q.body.data;if(!validData(d))return r.status(400).json({error:'بيانات غير صالحة'});
+/* تحقق الخادم: منع تعارض الملاعب وفحص أعضاء الفرق (يُفحص ما تغيّر فقط مقارنةً بالمحفوظ) */
+{const cur=await col.findOne({_id:SK(id)}),bad=validateSeason(cur&&cur.data,d);if(bad)return r.status(bad.status).json({error:bad.error,code:bad.code,details:bad.details})}
 await col.updateOne({_id:SK(id)},{$set:{data:d,at:new Date()}},{upsert:true});r.json({ok:true})}));
 app.post('/api/account',auth,W(async(q,r)=>{const{cur,u,p}=q.body||{},a=await A();if(!await bcrypt.compare(String(cur||''),a.h))return r.status(403).json({error:'كلمة المرور الحالية غير صحيحة'});if(p&&String(p).length<8)return r.status(400).json({error:'كلمة المرور الجديدة قصيرة (8 أحرف على الأقل)'});const n=String(u||a.u).trim();await col.updateOne({_id:'admin'},{$set:{u:n,h:p?await bcrypt.hash(String(p),12):a.h}});r.json({ok:true,u:n})}));
 app.use(express.static(path.join(__dirname,'public')));

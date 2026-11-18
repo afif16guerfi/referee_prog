@@ -110,3 +110,7 @@ body.rp-printing{background:#fff!important}
 #rpxPrint .rp-pg{break-after:page;page-break-after:always;margin:0}
 #rpxPrint .rp-pg:last-child{break-after:auto;page-break-after:auto}
 }
+
+/* عنوان برمجة الكأس (وسط الصفحة فوق الجدول) */
+.rp-cup{text-align:center;margin:6px auto 2px;max-width:94%;color:var(--hd);font-weight:800;font-size:24px;line-height:1.5;border-top:2.5px solid var(--bd);border-bottom:2.5px solid var(--bd);padding:3px 22px}
+.rp-pg.sm .rp-cup{font-size:20px}

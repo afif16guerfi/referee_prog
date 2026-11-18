@@ -145,3 +145,11 @@ i.mdr{font-style:normal;border:1px solid #b45f06;color:#b45f06;border-radius:10p
 .rol .rtx{flex:1;min-width:0;overflow-wrap:anywhere}
 .rol .rbt{display:flex;gap:4px}.rol .rbt .btn{min-height:32px;padding:2px 9px}
 .rol li{position:relative}.rol li.drg{z-index:5}.rol li.dtop{box-shadow:0 -3px 0 var(--ca)}.rol li.dbot{box-shadow:0 3px 0 var(--ca)}
+
+/* ===== جدول «الأعضاء الحاضرون» المستقل في المحضر + أزرار صغيرة ===== */
+.mat{margin:8px 4px 6px}
+.mmh{font-weight:800;font-size:16px;color:var(--mc,#0b6e4f);margin:0 0 5px;text-align:right}
+.pv table.mx.mam td:nth-child(2){text-align:right}
+.mat,.mat table{break-inside:avoid}
+.btn.sm{min-height:28px;padding:1px 8px;font-size:13px}
+.mhdw{padding-bottom:8px}
