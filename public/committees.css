@@ -69,6 +69,8 @@ i.mdr{font-style:normal;border:1px solid #b45f06;color:#b45f06;border-radius:10p
 .pv table.mcr,.mch .mcb table.mx{height:100%}
 .pv table.mp th{font-size:13px}
 .pv table.mp td{font-size:13.5px;background:var(--mtp,#fffaf0)}
+.pv table.mx td.lic{white-space:nowrap;overflow-wrap:normal;word-break:normal;padding-inline:3px}
+.pv table.mam th:first-child{white-space:nowrap}
 /* أجزاء الجدول في PDF: الترويسة (hd) مستديرة من الأعلى، والصف الأخير (ls) من الأسفل، وما بينهما مستقيم ليتصل الجدول بصريًا */
 .pv table.mx.mhh{border-radius:var(--mr,8px) var(--mr,8px) 0 0}
 .pv table.mp.rw{border-top:0;border-radius:0}

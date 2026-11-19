@@ -7,7 +7,8 @@ const CM={disc:{n:'لجنة الانضباط',P:true},org:{n:'لجنة التن�
 const LSTN=[['jd','قرارات الحكم'],['rs','الأسباب'],['cd','قرارات اللجنة'],['ar','المواد']];
 const ROLES0=['لاعب','مدرب','مدرب مساعد','رئيس النادي','مسير','مناصر'];
 const FONTS=['Cairo','Tajawal','Amiri'];
-const PCOL=[['lic','رقم الرخصة',9],['name','الاسم واللقب',17],['role','الصفة',9],['team','الفريق',14],['jd','قرار الحكم',12],['rs','السبب',13],['cd','قرار اللجنة',18],['ar','المادة',8]];
+/* نسب أعمدة جدول الأشخاص في PDF (المجموع 100%): رقم الرخصة 17% ليتسع لـ10 رموز في سطر واحد */
+const PCOL=[['lic','رقم الرخصة',17],['name','الاسم واللقب',15],['role','الصفة',9],['team','الفريق',12],['jd','قرار الحكم',11],['rs','السبب',11],['cd','قرار اللجنة',17],['ar','المادة',8]];
 const X=window.CMX={};
 const p2=n=>String(n).padStart(2,'0'),
  dmy=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')?d.split('-').reverse().join(' / '):String(d||''),
@@ -95,13 +96,13 @@ const infoH=(k,m,i)=>`<div class="mif"><span>الجلسة : ${bdi(dmy(m.date))}<
 /* الأعضاء الحاضرون: لجنة الانضباط تعرضهم في جدول مستقل بعنوانه (منفصل عن جدول اللاعبين والمسيرين)، ولجنة التنظيم تبقى كما كانت (سطر واحد) */
 memH=(k,m)=>{const L=(m.members||[]).filter(x=>x.n);if(!L.length)return '';
 if(k!='disc')return `<div class="mmb">الأعضاء الحاضرون : ${L.map(x=>esc(x.n)+(x.r?' ('+esc(x.r)+')':'')).join('، ')}</div>`;
-return `<div class="mat"><div class="mmh">الأعضاء الحاضرون</div><table class="mx mam"><colgroup><col style="width:8%"><col style="width:52%"><col style="width:40%"></colgroup><thead><tr><th>#</th><th>الاسم واللقب</th><th>الصفة</th></tr></thead><tbody>${L.map((x,j)=>`<tr><td>${bdi(p2(j+1))}</td><td>${esc(x.n)}</td><td>${esc(x.r||'')}</td></tr>`).join('')}</tbody></table></div>`},
+return `<div class="mat"><div class="mmh">الأعضاء الحاضرون</div><table class="mx mam"><colgroup><col style="width:12%"><col style="width:50%"><col style="width:38%"></colgroup><thead><tr><th>الرقم</th><th>الاسم واللقب</th><th>الصفة</th></tr></thead><tbody>${L.map((x,j)=>`<tr><td>${bdi(p2(j+1))}</td><td>${esc(x.n)}</td><td>${esc(x.r||'')}</td></tr>`).join('')}</tbody></table></div>`},
 stH='<div class="mst">دراسة القضايا</div>';
 const miniH=(k,m,i)=>`<div class="mmini"><span>${CM[k].n}</span><span>المحضر رقم : ${bdi(p2(noOf(k,i)))}</span><span>الجلسة : ${bdi(dmy(m.date))}</span></div>`;
 const caseHead=(c,n)=>`<div class="mch"><div class="mca"><table class="mx mcr"><colgroup><col style="width:30%"><col></colgroup><tr><th>رقم القضية</th><td>${bdi(p2(n))}</td></tr><tr><th>المقابلة</th><td>${esc(c.t1)} – ${esc(c.t2)}</td></tr></table></div><div class="mcb"><table class="mx"><thead><tr><th>الصنف</th><th>التاريخ</th><th>الوقت</th><th>الملعب</th></tr></thead><tbody><tr><td>${esc(c.cat)}</td><td>${bdi(dmy(c.date))}</td><td>${bdi(c.time?ft(c.time):'')}</td><td>${esc(c.stad)}</td></tr></tbody></table></div></div>`;
 const mCols='<colgroup>'+PCOL.map(c=>`<col style="width:${c[2]}%">`).join('')+'</colgroup>',
  pHead=()=>`<table class="mx mp mhh">${mCols}<thead><tr>${PCOL.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead></table>`,
- pCells=r=>PCOL.map(c=>`<td>${c[0]=='lic'?bdi(r.lic):esc(r[c[0]])}</td>`).join('');
+ pCells=r=>PCOL.map(c=>c[0]=='lic'?`<td class="lic">${bdi(r.lic)}</td>`:`<td>${esc(r[c[0]])}</td>`).join('');
 const caseH=(k,c,n)=>`<div class="mcs">${caseHead(c,n)}${CM[k].P&&c.rows&&c.rows.length?`<div class="tw"><table class="mx mp${rtEmpty(c.report)?'':' tj'}">${mCols}<thead><tr>${PCOL.map(x=>`<th>${x[1]}</th>`).join('')}</tr></thead><tbody>${c.rows.map(r=>`<tr>${pCells(r)}</tr>`).join('')}</tbody></table></div>`:''}${rtEmpty(c.report)?'':`<div class="mrp">${cleanHtml(c.report)}</div>`}</div>`;
 const docH=(k,m,i)=>{const b=baseOf(k,i);return `<table class="mpt"><thead><tr><td class="sp"></td></tr></thead><tbody><tr><td>${hdrH(k)}${infoH(k,m,i)}${memH(k,m)}${stH}</td></tr>${m.cases.map((c,j)=>`<tr><td>${caseH(k,c,b+j+1)}</td></tr>`).join('')||'<tr><td class="em">لا توجد قضايا في هذا المحضر.</td></tr>'}</tbody><tfoot><tr><td class="sp">${pfoot()}</td></tr></tfoot></table><div class="mfx" aria-hidden="true"></div>`};
 
@@ -277,13 +278,15 @@ const ns=[];ed.querySelectorAll('font[size="7"]').forEach(f=>{const sp=document.
 X.print=(k,id)=>{if(ED){toast('احفظ المحضر أو أغلق المحرر قبل الطباعة');return}VW[k]=id;page=k;go();setTimeout(X.printNow,250)};
 X.printNow=()=>{const s=document.createElement('style');s.id='mpg';s.textContent='@page{size:A4 portrait;margin:0}';document.head.appendChild(s);const ct=[...document.querySelectorAll('.mpv .ct')];ct.forEach(e=>{e.style.fontSize='12px';const sp=e.querySelector('span');if(sp&&sp.offsetWidth>650)e.style.fontSize=(12*650/sp.offsetWidth)+'px'});const done=()=>{s.remove();ct.forEach(e=>e.style.fontSize='');removeEventListener('afterprint',done)};addEventListener('afterprint',done);window.print()};
 
+/* يصغّر خط خلية رقم الرخصة وحدها إن لم تتسع الرموز في سطر واحد (حماية للأحرف العريضة جدًا) */
+const fitLic=root=>root.querySelectorAll('td.lic').forEach(td=>{const b=td.firstElementChild;if(!b)return;const cs=getComputedStyle(td),av=td.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),w=b.getBoundingClientRect().width;if(av>0&&w>av)td.style.fontSize=(parseFloat(cs.fontSize)*av/w*.97)+'px'});
 /* ===== تصدير PDF (A4 عمودي): صفحات متعددة دون قص أي صف أو قضية قدر الإمكان ===== */
 X.pdf=async(k,id)=>{let host;try{if(ED&&ED.k==k&&ED.mid==id&&ED.dirty){toast('احفظ التعديلات أولًا ثم صدّر الملف');return}
 if(!window.jspdf||!window.html2canvas)return toast('تعذر تحميل مكتبة PDF، تحقق من الاتصال');const m=mById(k,id);if(!m)return;
 toast('جارٍ إنشاء الملف…');await document.fonts.ready;await Promise.all(FONTS.map(f=>document.fonts.load('700 16px "'+f+'"').catch(()=>0)));
 const i=mIdx(k,id),base=baseOf(k,i),P=CM[k].P,W=760,PW=210,PH=297,MX=10,MT=14,MB=15,kk=(PW-2*MX)/W;
 host=document.createElement('div');host.className='pv pdfx';const TH=thOf(k);host.style.cssText=`position:absolute;left:-20000px;top:0;width:${W}px;padding:0;border:0;background:transparent;color:#111;${thVars(TH)}`;document.body.appendChild(host);
-const R=async html=>{host.innerHTML=html;const n=host.firstElementChild,c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}};
+const R=async html=>{host.innerHTML=html;fitLic(host);const n=host.firstElementChild,c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}};
 const F=await(async()=>{host.innerHTML=pfoot();const n=host.firstElementChild;if(!n||!host.textContent.trim())return{c:null,h:0};const sp=n.querySelector('span');if(sp&&sp.offsetWidth>W-10)n.style.fontSize=(12*(W-10)/sp.offsetWidth)+'px';const c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}})();
 const Hf=await R(`<div class="mhdw">${hdrH(k)}${infoH(k,m,i)}</div>`),Hs=await R(`<div class="mhdw">${memH(k,m)}${stH}</div>`),Hm=await R(miniH(k,m,i)),bg=mBg(TH);
 const pdf=new jspdf.jsPDF({orientation:'p',unit:'mm',format:'a4'}),maxY=PH-MB-F.h-3;let y=0,ys=0;
