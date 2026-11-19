@@ -281,13 +281,13 @@ X.printNow=()=>{const s=document.createElement('style');s.id='mpg';s.textContent
 /* يصغّر خط خلية رقم الرخصة وحدها إن لم تتسع الرموز في سطر واحد (حماية للأحرف العريضة جدًا) */
 const fitLic=root=>root.querySelectorAll('td.lic').forEach(td=>{const b=td.firstElementChild;if(!b)return;const cs=getComputedStyle(td),av=td.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),w=b.getBoundingClientRect().width;if(av>0&&w>av)td.style.fontSize=(parseFloat(cs.fontSize)*av/w*.97)+'px'});
 /* ===== تصدير PDF (A4 عمودي): صفحات متعددة دون قص أي صف أو قضية قدر الإمكان ===== */
-X.pdf=async(k,id)=>{let host;try{if(ED&&ED.k==k&&ED.mid==id&&ED.dirty){toast('احفظ التعديلات أولًا ثم صدّر الملف');return}
-if(!window.jspdf||!window.html2canvas)return toast('تعذر تحميل مكتبة PDF، تحقق من الاتصال');const m=mById(k,id);if(!m)return;
+X.pdf=async(k,id)=>{let host,rtlOff=()=>{};try{if(ED&&ED.k==k&&ED.mid==id&&ED.dirty){toast('احفظ التعديلات أولًا ثم صدّر الملف');return}
+if(!window.jspdf||!window.html2canvas)return toast('تعذر تحميل مكتبة PDF، تحقق من الاتصال');const m=mById(k,id);if(!m)return;if(window.pdfRtl)rtlOff=pdfRtl.on();/* رسم النص العربي باتجاه RTL على لوحات التصدير (الأقواس والفواصل) */
 toast('جارٍ إنشاء الملف…');await document.fonts.ready;await Promise.all(FONTS.map(f=>document.fonts.load('700 16px "'+f+'"').catch(()=>0)));
 const i=mIdx(k,id),base=baseOf(k,i),P=CM[k].P,W=760,PW=210,PH=297,MX=10,MT=14,MB=15,kk=(PW-2*MX)/W;
 host=document.createElement('div');host.className='pv pdfx';const TH=thOf(k);host.style.cssText=`position:absolute;left:-20000px;top:0;width:${W}px;padding:0;border:0;background:transparent;color:#111;${thVars(TH)}`;document.body.appendChild(host);
-const R=async html=>{host.innerHTML=html;fitLic(host);const n=host.firstElementChild,c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}};
-const F=await(async()=>{host.innerHTML=pfoot();const n=host.firstElementChild;if(!n||!host.textContent.trim())return{c:null,h:0};const sp=n.querySelector('span');if(sp&&sp.offsetWidth>W-10)n.style.fontSize=(12*(W-10)/sp.offsetWidth)+'px';const c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}})();
+const R=async html=>{host.innerHTML=html;fitLic(host);if(window.pdfRtl)pdfRtl.scan(host);const n=host.firstElementChild,c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}};
+const F=await(async()=>{host.innerHTML=pfoot();if(window.pdfRtl)pdfRtl.scan(host);const n=host.firstElementChild;if(!n||!host.textContent.trim())return{c:null,h:0};const sp=n.querySelector('span');if(sp&&sp.offsetWidth>W-10)n.style.fontSize=(12*(W-10)/sp.offsetWidth)+'px';const c=await html2canvas(n,{scale:2,backgroundColor:null});return{c,h:c.height/2*kk}})();
 const Hf=await R(`<div class="mhdw">${hdrH(k)}${infoH(k,m,i)}</div>`),Hs=await R(`<div class="mhdw">${memH(k,m)}${stH}</div>`),Hm=await R(miniH(k,m,i)),bg=mBg(TH);
 const pdf=new jspdf.jsPDF({orientation:'p',unit:'mm',format:'a4'}),maxY=PH-MB-F.h-3;let y=0,ys=0;
 const img=(u,yy)=>pdf.addImage(u.c.toDataURL('image/png'),'PNG',MX,yy,PW-2*MX,u.h);
@@ -309,5 +309,5 @@ y+=4}
 const np=pdf.getNumberOfPages();if(F.c)for(let p=1;p<=np;p++){pdf.setPage(p);pdf.addImage(F.c.toDataURL('image/png'),'PNG',MX,PH-MB-F.h,PW-2*MX,F.h)}
 host.remove();host=null;
 const a=document.createElement('a'),u=URL.createObjectURL(pdf.output('blob'));a.href=u;a.download=`محضر-${p2(noOf(k,i))}-${CM[k].n.replace(/\s+/g,'-')}.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);toast('تم حفظ الملف')}
-catch(e){console.error(e);toast('تعذر إنشاء الملف')}finally{host&&host.remove()}};
+catch(e){console.error(e);toast('تعذر إنشاء الملف')}finally{rtlOff();host&&host.remove()}};
 })();

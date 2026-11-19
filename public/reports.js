@@ -170,12 +170,12 @@ if(!window.jspdf||!window.html2canvas)return toast('تعذر تحميل مكتب
 BUSY=true;pdfBtn(true);let host=null,dl=null;
 try{dl=window.claude?await window.claude.use('downloads'):null}catch(e){}
 if(!dl)dl={save:async o=>{const a=document.createElement('a');a.href=URL.createObjectURL(o.data);a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}};
-try{toast('جارٍ تجهيز PDF...');await document.fonts.ready;if(window.iconsReady)await iconsReady;
+let rtlOff=()=>{};try{if(window.pdfRtl)rtlOff=pdfRtl.on();toast('جارٍ تجهيز PDF...');await document.fonts.ready;if(window.iconsReady)await iconsReady;
 const land=isLand(),A4=land?[297,210]:[210,297];let res=null,on=false;
 /* المحاولة 1: حاوية خارج الشاشة. إن خرجت صفحة بيضاء تُعاد المحاولة مرة واحدة بحاوية داخل نطاق الشاشة (خلف الواجهة) */
 for(let at=0;at<2&&!res;at++){if(host)host.remove();host=pdfHost(on);const r=build(list,O.wr,land,host);
 if(!ready(r.pages))throw Object.assign(new Error('تعذر تجهيز محتوى التقرير'),{code:'empty'});
-await waitImgs(host);await nextFrame();const out=[];let bad=false;
+if(window.pdfRtl)pdfRtl.scan(host);await waitImgs(host);await nextFrame();const out=[];let bad=false;
 for(const pg of r.pages){const cv=await html2canvas(pg,{scale:2,backgroundColor:'#ffffff',width:r.W,height:r.H,windowWidth:r.W,useCORS:true,logging:false,onclone:(d,el)=>forceVis(el)});if(blank(cv)){bad=true;break}out.push(cv)}
 if(bad)on=true;else res=out}
 if(!res)throw Object.assign(new Error('الصفحات المُنتَجة فارغة'),{code:'blank'});
@@ -184,7 +184,7 @@ res.forEach((cv,i)=>{if(i)doc.addPage();doc.addImage(cv.toDataURL('image/jpeg',.
 const nmx=[O.wr?'تعيينات-الحكام':'برنامج-المقابلات',O.cat&&nm('cats',O.cat),O.date&&O.date].filter(Boolean).join('-').replace(/\s+/g,'-');
 host.remove();host=null;await dl.save({filename:nmx+'.pdf',data:doc.output('blob')});toast('تم حفظ الملف')}
 catch(e){console.error(e);if(!e||e.code!='declined')toast(e&&(e.code=='empty'||e.code=='blank')?'⛔ تعذر تجهيز محتوى التقرير، لم يُنشأ أي ملف. أغلق المعاينة وافتحها ثم أعد المحاولة':'تعذر إنشاء الملف')}
-finally{if(host)host.remove();BUSY=false;pdfBtn(false)}}
+finally{rtlOff();if(host)host.remove();BUSY=false;pdfBtn(false)}}
 function print(){const list=scoped();if(!list.length)return toast('لا توجد مقابلات للطباعة');
 let box=document.getElementById('rpxPrint');if(box)box.remove();box=document.createElement('div');box.id='rpxPrint';document.body.appendChild(box);
 const land=isLand(),r=build(list,O.wr,land,box),st=document.createElement('style');st.id='rpxPg';st.textContent=`@page{size:A4 ${land?'landscape':'portrait'};margin:0}`;document.head.appendChild(st);
