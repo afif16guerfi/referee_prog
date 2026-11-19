@@ -68,6 +68,36 @@ function decide(t,font){
 }
 function isRtl(t){return decide(t,'')==='rtl'}
 
+/* ----- محركات لا تعكس شكل القوس (mirroring) عند ctx.direction='rtl' (يظهر )01( بدل (01)) -----
+   كشف تلقائي مرة واحدة: نرسم «(» باتجاهين ونقارن البكسلات؛ إن تطابقا فالمحرك لا يعكس. عندها، وللوحدات المرسومة بـ rtl فقط، يُبدَّل
+   شكل القوس عند الرسم (لا في DOM ولا البيانات) إذا كان مستواه في خوارزمية BiDi فرديًا (RTL)، أي حين يحيط به RTL/أرقام/حدّ الوحدة.
+   أما القوس بين حرفين لاتينيين (مستوى زوجي) فلا يُبدَّل، كما يفعل المتصفح. */
+const PAIR={'(':')',')':'(','[':']',']':'[','{':'}','}':'{','<':'>','>':'<','\u00AB':'\u00BB','\u00BB':'\u00AB','\u2039':'\u203A','\u203A':'\u2039'};
+const LAT=/[A-Za-z\u00C0-\u02AF\u0370-\u058F]/,RR=/[0-9\u0660-\u0669\u06F0-\u06F9\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+const cls=ch=>LAT.test(ch)?'L':RR.test(ch)?'R':PAIR[ch]?'B':'N';
+function swapBr(t){
+  const a=Array.from(String(t)),k=a.map(cls);let out=false;
+  for(let i=0;i<a.length;i++){
+    if(k[i]!=='B')continue;
+    let p='R',n='R';
+    for(let j=i-1;j>=0;j--)if(k[j]==='L'||k[j]==='R'){p=k[j];break}
+    for(let j=i+1;j<a.length;j++)if(k[j]==='L'||k[j]==='R'){n=k[j];break}
+    if((p===n?p:'R')==='R'){a[i]=PAIR[a[i]];out=true}
+  }
+  return out?a.join(''):String(t);
+}
+let mirrors=null;
+function engineMirrors(){
+  if(mirrors!==null)return mirrors;
+  try{
+    const c=document.createElement('canvas');c.width=c.height=32;const g=(orig?orig:HTMLCanvasElement.prototype.getContext).call(c,'2d',{willReadFrequently:true});
+    const px=d=>{g.clearRect(0,0,32,32);g.font='24px sans-serif';g.textBaseline='alphabetic';g.textAlign='left';g.direction=d;g.fillText('(',6,24);return g.getImageData(0,0,32,32).data};
+    const a=px('ltr'),b=px('rtl');let diff=0;for(let i=3;i<a.length;i+=4)if(a[i]!==b[i])diff++;
+    mirrors=diff>0;
+  }catch(e){mirrors=true}
+  return mirrors;
+}
+
 function on(){
   if(depth++===0){
     reg=new Map();orig=HTMLCanvasElement.prototype.getContext;
@@ -75,7 +105,7 @@ function on(){
       const c=orig.apply(this,a);
       if(a[0]==='2d'&&c&&!c.__pdfRtl){
         c.__pdfRtl=1;const f=c.fillText;
-        c.fillText=function(t,...r){try{const d=decide(t,this.font);if(d)this.direction=d}catch(e){}return f.call(this,t,...r)};
+        c.fillText=function(t,...r){try{const d=decide(t,this.font);if(d){this.direction=d;if(d==='rtl'&&typeof t==='string'&&!(pdfRtl.forceMirror??engineMirrors()))t=swapBr(t)}}catch(e){}return f.call(this,t,...r)};
       }
       return c;
     };
@@ -96,5 +126,5 @@ function on(){
     if(origH2C){if(window.html2canvas===wrapH2C)window.html2canvas=origH2C;origH2C=wrapH2C=null}
     reg=new Map()}};
 }
-window.pdfRtl={on,scan,isRtl,tag};
+window.pdfRtl={on,scan,isRtl,tag,swapBr,engineMirrors,forceMirror:undefined};
 })();

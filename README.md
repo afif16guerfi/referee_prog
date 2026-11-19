@@ -124,3 +124,4 @@ git push -u origin main
 - الحل عام ويعمل أثناء التصدير فقط: `pdfRtl.on()` يغلّف `html2canvas` مؤقتًا، وفي النسخة المستنسخة (onclone) يُوسَم كل عنصر نصي باتجاهه الحقيقي (من `direction` و`dir` و`<bdi>`) عبر اسم خط وهمي في `font-family`، فيضبط الخطّاف `ctx.direction` بدقة لكل وحدة. لا يتغير DOM الأصلي ولا البيانات ولا التخطيط.
 - أي تصدير جديد يكفيه: `const off=pdfRtl.on(); try{ …html2canvas(…) } finally{ off() }`.
 - الاختبار: `tests/pdf-rtl/` (يتطلب Playwright): `node tests/pdf-rtl/run.js <مسار pdf-rtl.js> <اسم> tests/pdf-rtl/cases.json` ثم `python3 tests/pdf-rtl/cmp.py <اسم>`.
+- بعض المحركات (Firefox/Safari) لا تعكس شكل القوس عند `ctx.direction='rtl'` فيظهر `)01(`. يكشف `pdf-rtl.js` ذلك تلقائيًا ويبدّل جهة القوس عند الرسم فقط (حسب مستواه في BiDi). للاختبار: `EMU=1 node tests/pdf-rtl/run.js …` يحاكي هذا المحرك.

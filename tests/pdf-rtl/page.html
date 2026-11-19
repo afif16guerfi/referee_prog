@@ -1,10 +1,17 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><style>
 body{margin:0;background:#fff;font:20px "DejaVu Sans",sans-serif;color:#000}
 #dom{width:700px;padding:10px;box-sizing:border-box}#cv{width:700px;padding:0}#clone{position:absolute;left:0;top:900px;visibility:hidden;width:700px}
-.row{height:40px;line-height:40px;white-space:nowrap}.row:last-child{height:80px}
+.row{height:40px;line-height:40px;white-space:nowrap}
 .ltr{display:inline-block;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
 table{border-collapse:collapse;width:100%}td{border:1px solid #999;text-align:center;height:36px}
 </style></head><body><div id="dom"></div><div id="cv"></div><div id="clone"></div>
+<script>
+if(location.hash==='#emu'){/* محاكاة محرك لا يعكس الأقواس في rtl: Chromium يرسم rtl بعد عكس الأقواس مسبقًا فيلغي انعكاسه الخاص */
+ const PAIR={'(':')',')':'(','[':']',']':'[','{':'}','}':'{'};const LAT=/[A-Za-z]/,RR=/[0-9\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+ const un=t=>{const a=[...t],k=a.map(c=>LAT.test(c)?'L':RR.test(c)?'R':PAIR[c]?'B':'N');a.forEach((c,i)=>{if(k[i]!=='B')return;let p='R',n='R';for(let j=i-1;j>=0;j--)if(k[j]=='L'||k[j]=='R'){p=k[j];break}for(let j=i+1;j<a.length;j++)if(k[j]=='L'||k[j]=='R'){n=k[j];break}if((p==n?p:'R')=='R')a[i]=PAIR[c]});return a.join('')};
+ const g=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(...a){const c=g.apply(this,a);if(a[0]==='2d'&&!c.__emu){c.__emu=1;const f=c.fillText;c.fillText=function(t,...r){return f.call(this,this.direction==='rtl'?un(t):t,...r)}}return c};
+}
+</script>
 <script src="PDFRTL"></script>
 <script>
 /* محاكاة html2canvas 1.4.1: لكل عقدة نصية، تُقسَّم إلى وحدات (كلمة + مسافات لاحقة)، ويُرسم كل جزء بـ ctx.fillText على لوحة منفصلة
